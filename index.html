@@ -38,13 +38,14 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .otp-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px}
 .otp-desc strong{color:var(--text)}
 .phone-row{display:flex;gap:8px;margin-bottom:14px}
-.cc-input{width:68px;padding:13px 8px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;text-align:center;outline:none;transition:border-color .18s}
+.cc-input{width:90px;padding:13px 4px;border:1.5px solid var(--border);border-radius:12px;font-size:12px;font-family:'DM Sans',sans-serif;text-align:center;outline:none;transition:border-color .18s;cursor:pointer;background:white}
 .ph-input{flex:1;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .18s}
 .cc-input:focus,.ph-input:focus{border-color:var(--green2)}
 .otp-btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;margin-bottom:10px}
 .otp-btn.wa{background:#25D366;color:white}.otp-btn.wa:hover{background:#1aab56}
 .otp-btn.primary{background:var(--green);color:white}.otp-btn.primary:hover{background:var(--green-dark)}
 .otp-note{font-size:11px;color:var(--muted);text-align:center;line-height:1.6}
+.otp-btn:disabled{opacity:.6;cursor:not-allowed}
 .otp-boxes{display:flex;gap:10px;justify-content:center;margin-bottom:18px}
 .otp-box{width:52px;height:58px;border:2px solid var(--border);border-radius:14px;font-size:24px;font-weight:700;text-align:center;outline:none;font-family:'DM Sans',sans-serif;transition:border-color .18s}
 .otp-box:focus{border-color:var(--green2)}
@@ -259,9 +260,35 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
       <div class="session-pill">🔒 Members only · Verified via WhatsApp</div>
       <div class="otp-title">Welcome!</div>
       <div class="otp-desc">Enter your WhatsApp number to access community recipes.</div>
+      <div id="not-member-msg" style="display:none;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:10px 12px;font-size:12px;color:#dc2626;margin-bottom:12px;line-height:1.6"></div>
       <div class="phone-row">
-        <input class="cc-input" value="+91" type="tel"/>
-        <input class="ph-input" id="ph-input" placeholder="98765 43210" type="tel"/>
+        <select class="cc-input" id="cc-select" style="width:90px;padding:13px 4px;font-size:12px;cursor:pointer">
+          <option value="+91">🇮🇳 +91</option>
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+61">🇦🇺 +61</option>
+          <option value="+971">🇦🇪 +971</option>
+          <option value="+966">🇸🇦 +966</option>
+          <option value="+65">🇸🇬 +65</option>
+          <option value="+60">🇲🇾 +60</option>
+          <option value="+94">🇱🇰 +94</option>
+          <option value="+977">🇳🇵 +977</option>
+          <option value="+880">🇧🇩 +880</option>
+          <option value="+92">🇵🇰 +92</option>
+          <option value="+27">🇿🇦 +27</option>
+          <option value="+49">🇩🇪 +49</option>
+          <option value="+33">🇫🇷 +33</option>
+          <option value="+81">🇯🇵 +81</option>
+          <option value="+86">🇨🇳 +86</option>
+          <option value="+55">🇧🇷 +55</option>
+          <option value="+234">🇳🇬 +234</option>
+          <option value="+254">🇰🇪 +254</option>
+          <option value="other">🌍 Other</option>
+        </select>
+        <input class="ph-input" id="ph-input" placeholder="Enter phone number" type="tel"/>
+      </div>
+      <div id="other-cc-wrap" style="display:none;margin-bottom:10px">
+        <input class="f-input" id="other-cc" placeholder="Enter country code e.g. +123" type="tel" style="margin-bottom:0"/>
       </div>
       <button class="otp-btn wa" onclick="sendOTP()">📲 Send OTP on WhatsApp</button>
       <div class="otp-note">You'll stay logged in for <strong>30 days</strong> after verification.</div>
@@ -380,6 +407,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
     <div class="p-tabs">
       <button class="p-tab active" onclick="pTab(this,'upload-tab')">📹 Upload</button>
       <button class="p-tab" onclick="pTab(this,'broadcast-tab')">📢 Broadcast</button>
+      <button class="p-tab" onclick="pTab(this,'settings-tab')">⚙️ Settings</button>
     </div>
 
     <!-- Upload tab -->
@@ -395,6 +423,43 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
       <button class="pub-btn" onclick="alert('✅ Recipe published! Add the data to your Google Sheet too.')">Publish Recipe</button>
     </div>
 
+    <!-- Settings tab -->
+    <div id="settings-tab" style="display:none">
+      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:14px;padding:16px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div style="width:34px;height:34px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px">🔐</div>
+          <div><strong style="font-size:13px;color:#166534;display:block">Change Admin Password</strong><span style="font-size:11px;color:#4ade80">Only you can see this panel</span></div>
+        </div>
+        <div class="form-grp">
+          <label class="form-lbl">Current Password</label>
+          <input class="f-input" id="curr-pwd" type="password" placeholder="Enter current password"/>
+        </div>
+        <div class="form-grp">
+          <label class="form-lbl">New Password</label>
+          <input class="f-input" id="new-pwd" type="password" placeholder="Min 6 characters"/>
+        </div>
+        <div class="form-grp">
+          <label class="form-lbl">Confirm New Password</label>
+          <input class="f-input" id="conf-pwd" type="password" placeholder="Re-enter new password"/>
+        </div>
+        <div id="pwd-msg" style="font-size:12px;margin-bottom:10px;min-height:18px"></div>
+        <button class="pub-btn" onclick="changePassword()">🔐 Update Password</button>
+      </div>
+
+      <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:14px;padding:16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:34px;height:34px;background:#f97316;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px">ℹ️</div>
+          <div><strong style="font-size:13px;color:#9a3412;display:block">App Info</strong><span style="font-size:11px;color:#fb923c">WellbeingHub v1.0 · Phase 1</span></div>
+        </div>
+        <div style="font-size:12px;color:#92400e;line-height:1.8">
+          👥 Community: 100 members<br/>
+          📹 Recipes: <span id="info-count">6</span> videos<br/>
+          🔒 Auth: WhatsApp OTP (Phase 2)<br/>
+          📢 Broadcast: Wati.io (Phase 2)<br/>
+          🌐 Hosting: GitHub Pages · Free
+        </div>
+      </div>
+    </div>
     <!-- Broadcast tab -->
     <div id="broadcast-tab" style="display:none">
       <div class="coming-soon">⚠️ Wati.io integration coming in Phase 2. UI is ready — just needs API connection.</div>
@@ -458,17 +523,72 @@ const RECIPES = [
 ];
 const EMOJIS=['🥦','🥗','🍎','🥑','🫐','🍋','🥕','🌿','🍵','💪','❤️','🌟','✅','⚡','🔥','💧','🌱','🧘','🏃','💯','📌','⚠️','💡','🧠','🩺','🍽️','🥣','🍲','🍛','🥜','🫁','👏'];
 
+let adminPassword = localStorage.getItem('wbh_pwd') || 'WBH@2026';
 let currentFilter = 'All';
 let currentSearch = '';
 let ratings = {};
 
 // ── OTP FLOW ──
-function sendOTP(){
-  const ph = document.getElementById('ph-input').value;
-  if(!ph||ph.length<8){alert('Please enter a valid WhatsApp number');return;}
-  document.getElementById('ph-display').textContent = '+91 '+ph;
-  showStep('s-otp');
-  setTimeout(()=>document.querySelectorAll('.otp-box')[0].focus(),100);
+function getCCode(){
+  const sel = document.getElementById('cc-select').value;
+  if(sel==='other'){
+    const oc = document.getElementById('other-cc').value.trim();
+    return oc.startsWith('+') ? oc : '+'+oc;
+  }
+  return sel;
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('cc-select').addEventListener('change', function(){
+    document.getElementById('other-cc-wrap').style.display = this.value==='other'?'block':'none';
+  });
+});
+
+async function sendOTP(){
+  const ph = document.getElementById('ph-input').value.replace(/\s/g,'');
+  const cc = getCCode();
+  if(!ph||ph.length<5){alert('Please enter a valid phone number');return;}
+  if(cc==='other'||!cc){alert('Please enter a valid country code');return;}
+  const btn = document.querySelector('.otp-btn.wa');
+  btn.textContent = '⏳ Checking membership...';
+  btn.disabled = true;
+  try {
+    const fullNum = cc+ph;
+    const isMember = await checkMember(fullNum);
+    if(!isMember){
+      btn.textContent = '📲 Send OTP on WhatsApp';
+      btn.disabled = false;
+      showNotMember();
+      return;
+    }
+    document.getElementById('ph-display').textContent = fullNum;
+    document.getElementById('not-member-msg').style.display='none';
+    showStep('s-otp');
+    setTimeout(()=>document.querySelectorAll('.otp-box')[0].focus(),100);
+  } catch(e) {
+    btn.textContent = '📲 Send OTP on WhatsApp';
+    btn.disabled = false;
+    alert('Connection error. Please check your internet and try again.');
+  }
+}
+
+async function checkMember(phone){
+  const sheetId = '1PH3ewef8ti1NN-qLg5YznUAsMpEwj5EJqUBtSUTeW5k';
+  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=Members`;
+  const res = await fetch(url);
+  const text = await res.text();
+  const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*?)\);/s)[1]);
+  const rows = json.table.rows;
+  const normalize = n => n.toString().replace(/\s/g,'').replace(/^\+/,'');
+  const numbers = rows.map(r => r.c[2]?.v?.toString()).filter(Boolean);
+  const inputNorm = normalize(phone);
+  return numbers.some(n => normalize(n) === inputNorm);
+}
+
+function showNotMember(){
+  const msg = document.getElementById('not-member-msg');
+  msg.style.display='block';
+  msg.innerHTML = '❌ <strong>This number is not registered.</strong><br/>Please contact your community admin to get access.';
 }
 function otpMove(el,idx){
   if(el.value.length===1){
@@ -611,6 +731,12 @@ function switchTab(el){
 
 // ── ADMIN PANEL ──
 function openPanel(){
+  const pwd = prompt('🔐 Enter Admin Password:');
+  if(pwd === null) return;
+  if(pwd !== adminPassword){
+    alert('❌ Incorrect password. Members cannot access the admin panel.');
+    return;
+  }
   document.getElementById('panel-overlay').classList.add('open');
   buildEmojiGrid();
 }
@@ -619,8 +745,8 @@ function closePanelOut(e){if(e.target===document.getElementById('panel-overlay')
 function pTab(el,tabId){
   document.querySelectorAll('.p-tab').forEach(t=>t.classList.remove('active'));
   el.classList.add('active');
-  document.getElementById('upload-tab').style.display=tabId==='upload-tab'?'block':'none';
-  document.getElementById('broadcast-tab').style.display=tabId==='broadcast-tab'?'block':'none';
+  ['upload-tab','broadcast-tab','settings-tab'].forEach(t=>document.getElementById(t).style.display=t===tabId?'block':'none');
+  if(tabId==='settings-tab')document.getElementById('info-count').textContent=RECIPES.length;
 }
 function buildEmojiGrid(){
   const g=document.getElementById('ep-grid');
@@ -646,6 +772,26 @@ function sendBc(){
   const msg=document.getElementById('msg-editor').innerText.trim();
   if(!msg){alert('Please type a message first.');return;}
   alert('✅ Message queued! Connect Wati.io in Phase 2 to send to all 100 members.');
+}
+
+// ── CHANGE PASSWORD ──
+function changePassword(){
+  const curr = document.getElementById('curr-pwd').value;
+  const nw = document.getElementById('new-pwd').value;
+  const conf = document.getElementById('conf-pwd').value;
+  const msg = document.getElementById('pwd-msg');
+  if(!curr||!nw||!conf){msg.style.color='#dc2626';msg.textContent='❌ Please fill all fields.';return;}
+  if(curr !== adminPassword){msg.style.color='#dc2626';msg.textContent='❌ Current password is incorrect.';return;}
+  if(nw.length < 6){msg.style.color='#dc2626';msg.textContent='❌ New password must be at least 6 characters.';return;}
+  if(nw !== conf){msg.style.color='#dc2626';msg.textContent='❌ New passwords do not match.';return;}
+  adminPassword = nw;
+  localStorage.setItem('wbh_pwd', nw);
+  msg.style.color='#16a34a';
+  msg.textContent='✅ Password updated successfully!';
+  document.getElementById('curr-pwd').value='';
+  document.getElementById('new-pwd').value='';
+  document.getElementById('conf-pwd').value='';
+  setTimeout(()=>msg.textContent='',3000);
 }
 </script>
 </body>
