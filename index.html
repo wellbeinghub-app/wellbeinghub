@@ -1,0 +1,652 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="#2D6A4F"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>WellbeingHub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --green:#2D6A4F;--green2:#52B788;--green-pale:#D8F3DC;--green-dark:#1B4332;
+  --orange:#E76F51;--amber:#F59E0B;--amber-pale:#FEF3C7;
+  --brown:#3D2B1F;--cream:#FEFAE0;
+  --text:#1a1a1a;--muted:#6b7280;--border:#e5e7eb;
+  --bg:#f7f4ef;--card:#ffffff;--radius:14px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;max-width:480px;margin:0 auto;position:relative}
+
+/* ── SCREENS ── */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s;overflow:hidden}
+.screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
+.screen.slide-left{transform:translateX(-100%);opacity:0;pointer-events:none}
+
+/* ── OTP SCREEN ── */
+#otp-screen{justify-content:center;align-items:center;padding:32px 24px;background:linear-gradient(160deg,#f7f4ef 60%,#d8f3dc)}
+.otp-logo{font-family:'Playfair Display',serif;font-size:32px;color:var(--green);text-align:center;margin-bottom:4px}
+.otp-logo span{color:var(--green2)}
+.otp-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:36px}
+.otp-card{background:white;border-radius:24px;padding:28px 24px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.08)}
+.otp-step{display:none}.otp-step.active{display:block}
+.session-pill{display:inline-flex;align-items:center;gap:5px;background:var(--green-pale);color:var(--green);font-size:11px;font-weight:500;padding:4px 12px;border-radius:100px;margin-bottom:16px}
+.otp-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:6px}
+.otp-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px}
+.otp-desc strong{color:var(--text)}
+.phone-row{display:flex;gap:8px;margin-bottom:14px}
+.cc-input{width:68px;padding:13px 8px;border:1.5px solid var(--border);border-radius:12px;font-size:14px;font-family:'DM Sans',sans-serif;text-align:center;outline:none;transition:border-color .18s}
+.ph-input{flex:1;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .18s}
+.cc-input:focus,.ph-input:focus{border-color:var(--green2)}
+.otp-btn{width:100%;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;margin-bottom:10px}
+.otp-btn.wa{background:#25D366;color:white}.otp-btn.wa:hover{background:#1aab56}
+.otp-btn.primary{background:var(--green);color:white}.otp-btn.primary:hover{background:var(--green-dark)}
+.otp-note{font-size:11px;color:var(--muted);text-align:center;line-height:1.6}
+.otp-boxes{display:flex;gap:10px;justify-content:center;margin-bottom:18px}
+.otp-box{width:52px;height:58px;border:2px solid var(--border);border-radius:14px;font-size:24px;font-weight:700;text-align:center;outline:none;font-family:'DM Sans',sans-serif;transition:border-color .18s}
+.otp-box:focus{border-color:var(--green2)}
+.resend-txt{font-size:12px;color:var(--muted);text-align:center;margin-bottom:14px}
+.resend-txt span{color:var(--green);cursor:pointer;font-weight:500}
+.back-link{font-size:12px;color:var(--muted);text-align:center;cursor:pointer;margin-top:6px}
+.back-link:hover{color:var(--green)}
+.success-wrap{text-align:center;padding:8px 0}
+.success-emoji{font-size:56px;margin-bottom:14px}
+
+/* ── MAIN APP ── */
+#app-screen{display:flex;flex-direction:column}
+.app-nav{background:var(--green);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0;position:relative;z-index:10}
+.app-logo{font-family:'Playfair Display',serif;color:white;font-size:19px}
+.app-logo span{color:var(--green2)}
+.admin-trigger{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:white;border-radius:8px;padding:6px 14px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .2s}
+.admin-trigger:hover{background:rgba(255,255,255,0.25)}
+
+.app-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:70px}
+
+/* hero */
+.hero{background:linear-gradient(135deg,var(--green),var(--green-dark));padding:24px 20px 20px;color:white;position:relative;overflow:hidden;flex-shrink:0}
+.hero::before{content:'';position:absolute;right:-20px;top:-20px;width:160px;height:160px;border-radius:50%;background:rgba(82,183,136,0.15)}
+.hero h1{font-family:'Playfair Display',serif;font-size:22px;line-height:1.3;margin-bottom:5px}
+.hero p{font-size:12px;opacity:.75;font-weight:300}
+.hero-stats{display:flex;gap:24px;margin-top:16px}
+.stat-num{font-size:20px;font-weight:700;color:var(--green2)}
+.stat-lbl{font-size:10px;opacity:.7;margin-top:1px}
+
+/* wa tip */
+.wa-tip{margin:14px 16px 0;background:white;border-left:4px solid #25D366;border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.wa-tip-icon{width:32px;height:32px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.wa-tip-text strong{font-size:12px;font-weight:500;display:block}
+.wa-tip-text span{font-size:11px;color:var(--muted)}
+
+/* filters */
+.filters-wrap{padding:14px 16px 0}
+.sec-label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.chips{display:flex;gap:7px;overflow-x:auto;padding-bottom:4px;scrollbar-width:none}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:7px 14px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--muted);transition:all .18s;white-space:nowrap}
+.chip:hover{border-color:var(--green2);color:var(--green)}
+.chip.active{background:var(--green);border-color:var(--green);color:white;font-weight:500}
+
+/* search */
+.search-wrap{padding:12px 16px 0}
+.search-box{display:flex;align-items:center;gap:8px;background:white;border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;transition:border-color .18s}
+.search-box:focus-within{border-color:var(--green2)}
+.search-icon{color:var(--muted);font-size:14px;flex-shrink:0}
+.search-input{border:none;outline:none;font-size:14px;font-family:'DM Sans',sans-serif;width:100%;background:transparent;color:var(--text)}
+.search-input::placeholder{color:var(--muted)}
+
+/* recipe list */
+.recipes-wrap{padding:14px 16px 0}
+.list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.list-header .sec-label{margin:0}
+.count-lbl{font-size:11px;color:var(--muted)}
+.recipe-list{display:flex;flex-direction:column;gap:12px}
+
+/* recipe card */
+.recipe-card{background:white;border-radius:var(--radius);overflow:hidden;display:flex;box-shadow:0 2px 8px rgba(0,0,0,0.06);cursor:pointer;transition:transform .2s,box-shadow .2s;animation:fadeUp .4s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.recipe-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.1)}
+.card-thumb{width:96px;min-height:96px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:34px;position:relative}
+.card-thumb.breakfast{background:linear-gradient(135deg,#FEF3C7,#FDE68A)}
+.card-thumb.lunch{background:linear-gradient(135deg,#D1FAE5,#A7F3D0)}
+.card-thumb.dinner{background:linear-gradient(135deg,#E0E7FF,#C7D2FE)}
+.card-thumb.soups{background:linear-gradient(135deg,#FCE7F3,#FBCFE8)}
+.card-thumb.salads{background:linear-gradient(135deg,#ECFDF5,#A7F3D0)}
+.card-thumb.snacks{background:linear-gradient(135deg,#FEF3C7,#FED7AA)}
+.dur-badge{position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.5);color:white;font-size:9px;padding:2px 6px;border-radius:100px;font-weight:500}
+.play-circle{position:absolute;bottom:7px;right:7px;width:26px;height:26px;background:rgba(0,0,0,0.55);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.play-circle::after{content:'';width:0;height:0;border-style:solid;border-width:4px 0 4px 7px;border-color:transparent transparent transparent white;margin-left:2px}
+.card-body{padding:11px 12px;flex:1;display:flex;flex-direction:column;justify-content:space-between}
+.card-cat{font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--green);margin-bottom:2px}
+.card-title{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--brown);line-height:1.3;margin-bottom:6px}
+.card-footer{display:flex;align-items:center;justify-content:space-between}
+.card-tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag{font-size:9px;background:var(--green-pale);color:var(--green);padding:2px 7px;border-radius:100px;font-weight:500}
+.card-rating{display:flex;align-items:center;gap:3px;font-size:11px;font-weight:500;color:var(--brown)}
+.stars{color:var(--amber);font-size:10px;letter-spacing:-1px}
+.rate-row{display:flex;align-items:center;gap:5px;margin-top:7px;padding-top:7px;border-top:1px solid var(--border)}
+.rate-lbl{font-size:10px;color:var(--muted);flex:1}
+.star-btns{display:flex;gap:1px}
+.sbtn{font-size:16px;background:none;border:none;cursor:pointer;opacity:.25;transition:opacity .15s,transform .15s;padding:0;line-height:1}
+.sbtn.lit{opacity:1}
+.sbtn:hover{transform:scale(1.2)}
+
+/* empty state */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-state .empty-icon{font-size:40px;margin-bottom:10px}
+.empty-state p{font-size:13px}
+
+/* bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:50%;transform:translateX(-50%);width:100%;max-width:480px;background:white;border-top:1px solid var(--border);display:flex;z-index:20}
+.nav-btn{flex:1;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif}
+.nav-icon{font-size:18px}
+.nav-lbl{font-size:10px;color:var(--muted)}
+.nav-btn.active .nav-lbl{color:var(--green);font-weight:500}
+
+/* ── DETAIL SCREEN ── */
+#detail-screen{background:white}
+.detail-nav{background:var(--green);height:56px;display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0}
+.back-btn{background:rgba(255,255,255,0.2);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.detail-nav-title{font-family:'Playfair Display',serif;color:white;font-size:16px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.detail-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:30px}
+.detail-thumb{height:200px;display:flex;align-items:center;justify-content:center;font-size:72px;position:relative}
+.video-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.15);cursor:pointer;transition:background .2s}
+.video-overlay:hover{background:rgba(0,0,0,0.25)}
+.big-play{width:60px;height:60px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.big-play::after{content:'';width:0;height:0;border-style:solid;border-width:10px 0 10px 18px;border-color:transparent transparent transparent white;margin-left:4px}
+.detail-content{padding:18px 16px}
+.detail-cat{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:var(--green);margin-bottom:4px}
+.detail-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--brown);margin-bottom:12px;line-height:1.3}
+.detail-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.detail-tag{font-size:11px;background:var(--green-pale);color:var(--green);padding:4px 12px;border-radius:100px;font-weight:500}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.info-card{background:var(--bg);border-radius:10px;padding:12px;text-align:center}
+.info-val{font-size:18px;font-weight:700;color:var(--green);font-family:'Playfair Display',serif}
+.info-key{font-size:11px;color:var(--muted);margin-top:2px}
+.watch-btn{width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s}
+.watch-btn:hover{background:var(--green-dark)}
+.share-btn{width:100%;background:white;color:var(--green);border:1.5px solid var(--green);border-radius:12px;padding:13px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:20px;transition:all .2s}
+.share-btn:hover{background:var(--green-pale)}
+.rating-section{background:var(--bg);border-radius:14px;padding:16px}
+.rating-title{font-size:14px;font-weight:500;margin-bottom:12px}
+.big-stars{display:flex;gap:8px;justify-content:center;margin-bottom:10px}
+.big-star{font-size:32px;cursor:pointer;opacity:.25;transition:opacity .15s,transform .2s}
+.big-star.lit{opacity:1}
+.big-star:hover{transform:scale(1.15)}
+.rating-note{font-size:12px;color:var(--muted);text-align:center}
+.notes-section{margin-top:16px;padding:14px;background:#fffbf0;border-radius:12px;border-left:3px solid var(--amber)}
+.notes-title{font-size:11px;font-weight:500;color:var(--amber);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.notes-text{font-size:13px;color:var(--brown);line-height:1.6}
+
+/* ── ADMIN PANEL ── */
+.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;align-items:flex-end;max-width:480px;left:50%;transform:translateX(-50%)}
+.panel-overlay.open{display:flex}
+.panel{background:white;border-radius:20px 20px 0 0;padding:20px 20px 32px;width:100%;max-height:88vh;overflow-y:auto;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+.panel-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.panel-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700}
+.close-btn{width:32px;height:32px;border-radius:50%;background:#f3f4f6;border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.p-tabs{display:flex;gap:4px;background:#f3f4f6;border-radius:10px;padding:4px;margin-bottom:16px}
+.p-tab{flex:1;text-align:center;padding:8px;border-radius:7px;font-size:13px;cursor:pointer;border:none;background:none;font-family:'DM Sans',sans-serif;color:var(--muted);transition:all .18s}
+.p-tab.active{background:white;color:var(--green);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.form-lbl{font-size:12px;font-weight:500;color:var(--muted);margin-bottom:5px;display:block}
+.form-grp{margin-bottom:12px}
+.f-input,.f-select,.f-textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .18s;background:white}
+.f-input:focus,.f-select:focus,.f-textarea:focus{border-color:var(--green2)}
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer;transition:all .18s}
+.upload-zone:hover{border-color:var(--green2);background:var(--green-pale)}
+.pub-btn{width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:4px;transition:background .2s}
+.pub-btn:hover{background:var(--green-dark)}
+
+/* broadcast */
+.bc-box{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:14px;padding:16px}
+.bc-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.bc-icon{width:34px;height:34px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.bc-hdr-txt strong{font-size:13px;color:#166534;display:block}
+.bc-hdr-txt span{font-size:11px;color:#4ade80}
+.media-row{display:flex;gap:7px;margin-bottom:10px}
+.media-btn{flex:1;background:white;border:1.5px solid #bbf7d0;border-radius:10px;padding:9px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:all .18s;font-family:'DM Sans',sans-serif}
+.media-btn:hover{background:var(--green-pale);border-color:var(--green2)}
+.media-btn-icon{font-size:20px}
+.media-btn-lbl{font-size:10px;color:var(--muted);font-weight:500}
+.media-preview{display:none;background:white;border:1.5px solid #bbf7d0;border-radius:10px;padding:10px 12px;margin-bottom:10px;align-items:center;gap:10px}
+.media-preview.show{display:flex}
+.prev-thumb{width:40px;height:40px;border-radius:8px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.prev-info{flex:1}
+.prev-name{font-size:12px;font-weight:500}
+.prev-size{font-size:10px;color:var(--muted)}
+.prev-rm{background:none;border:none;font-size:16px;cursor:pointer;color:var(--muted);padding:4px}
+.emoji-picker{display:none;background:white;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px;margin-bottom:10px}
+.emoji-picker.show{display:block}
+.ep-title{font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.ep-grid{display:flex;flex-wrap:wrap;gap:3px}
+.ep-item{font-size:20px;cursor:pointer;padding:4px;border-radius:6px;line-height:1;transition:background .15s}
+.ep-item:hover{background:#f3f4f6}
+.msg-wrap{background:white;border:1.5px solid #bbf7d0;border-radius:12px;overflow:hidden;margin-bottom:10px}
+.msg-toolbar{display:flex;align-items:center;gap:3px;padding:7px 10px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.tb-btn{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;transition:background .15s;color:var(--text)}
+.tb-btn:hover{background:#f3f4f6}
+.tb-divider{width:1px;height:18px;background:var(--border);margin:0 2px}
+.msg-editor{width:100%;min-height:80px;padding:11px;border:none;outline:none;font-size:14px;font-family:'DM Sans',sans-serif;resize:none;color:var(--text)}
+.msg-footer{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-top:1px solid var(--border)}
+.char-cnt{font-size:10px;color:var(--muted)}
+.sched-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.tog-track{position:relative;width:34px;height:18px;flex-shrink:0}
+.tog-track input{opacity:0;width:0;height:0;position:absolute}
+.tog-slider{position:absolute;cursor:pointer;inset:0;background:#d1d5db;border-radius:20px;transition:.2s}
+.tog-slider:before{content:'';position:absolute;height:12px;width:12px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.2s}
+.tog-track input:checked+.tog-slider{background:var(--green)}
+.tog-track input:checked+.tog-slider:before{transform:translateX(16px)}
+.sched-lbl{font-size:13px;flex:1}
+.sched-input{padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;flex:1;display:none}
+.wa-send{width:100%;background:#25D366;color:white;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.wa-send:hover{background:#1aab56}
+.wa-note{font-size:10px;color:#4ade80;text-align:center;margin-top:7px}
+.coming-soon{background:var(--amber-pale);border:1.5px solid var(--amber);border-radius:10px;padding:10px 14px;font-size:12px;color:#92400E;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+</style>
+</head>
+<body>
+
+<!-- ══════════════ OTP SCREEN ══════════════ -->
+<div class="screen" id="otp-screen">
+  <div class="otp-logo">Wellbeing<span>Hub</span></div>
+  <div class="otp-sub">Your private health & recipe community</div>
+  <div class="otp-card">
+    <!-- Step 1: Phone -->
+    <div class="otp-step active" id="s-phone">
+      <div class="session-pill">🔒 Members only · Verified via WhatsApp</div>
+      <div class="otp-title">Welcome!</div>
+      <div class="otp-desc">Enter your WhatsApp number to access community recipes.</div>
+      <div class="phone-row">
+        <input class="cc-input" value="+91" type="tel"/>
+        <input class="ph-input" id="ph-input" placeholder="98765 43210" type="tel"/>
+      </div>
+      <button class="otp-btn wa" onclick="sendOTP()">📲 Send OTP on WhatsApp</button>
+      <div class="otp-note">You'll stay logged in for <strong>30 days</strong> after verification.</div>
+    </div>
+    <!-- Step 2: OTP -->
+    <div class="otp-step" id="s-otp">
+      <div class="otp-title">Enter OTP</div>
+      <div class="otp-desc">4-digit code sent to <strong id="ph-display"></strong> on WhatsApp</div>
+      <div class="otp-boxes">
+        <input class="otp-box" maxlength="1" type="tel" oninput="otpMove(this,0)"/>
+        <input class="otp-box" maxlength="1" type="tel" oninput="otpMove(this,1)"/>
+        <input class="otp-box" maxlength="1" type="tel" oninput="otpMove(this,2)"/>
+        <input class="otp-box" maxlength="1" type="tel" oninput="otpMove(this,3)"/>
+      </div>
+      <div class="resend-txt">Didn't get it? <span onclick="alert('OTP resent!')">Resend OTP</span></div>
+      <button class="otp-btn primary" onclick="verifyOTP()">Verify & Enter</button>
+      <div class="back-link" onclick="goBack()">← Use a different number</div>
+    </div>
+    <!-- Step 3: Success -->
+    <div class="otp-step" id="s-success">
+      <div class="success-wrap">
+        <div class="success-emoji">✅</div>
+        <div class="otp-title" style="text-align:center">You're in!</div>
+        <div class="otp-desc" style="text-align:center">Welcome to WellbeingHub. Logged in for 30 days.</div>
+        <button class="otp-btn primary" onclick="enterApp()">View Recipes →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ MAIN APP ══════════════ -->
+<div class="screen hidden" id="app-screen">
+  <nav class="app-nav">
+    <div class="app-logo">Wellbeing<span>Hub</span></div>
+    <button class="admin-trigger" onclick="openPanel()">⚙️ Admin</button>
+  </nav>
+
+  <div class="app-body">
+    <!-- Hero -->
+    <div class="hero">
+      <h1>Healthy Recipes<br>for Our Community</h1>
+      <p>Curated by your nutrition experts · New recipes weekly</p>
+      <div class="hero-stats">
+        <div><div class="stat-num" id="total-count">6</div><div class="stat-lbl">Recipes</div></div>
+        <div><div class="stat-num">100</div><div class="stat-lbl">Members</div></div>
+        <div><div class="stat-num">4.8★</div><div class="stat-lbl">Avg Rating</div></div>
+      </div>
+    </div>
+
+    <!-- WA tip -->
+    <div class="wa-tip">
+      <div class="wa-tip-icon">💬</div>
+      <div class="wa-tip-text">
+        <strong>🥦 Eat fiber-rich foods in the morning to stabilise blood sugar</strong>
+        <span>Admin · Nutrition tip · 2h ago</span>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-wrap">
+      <div class="sec-label">Browse by category</div>
+      <div class="chips" id="chips">
+        <div class="chip active" onclick="setFilter(this,'All')">🍽️ All</div>
+        <div class="chip" onclick="setFilter(this,'Breakfast')">🌅 Breakfast</div>
+        <div class="chip" onclick="setFilter(this,'Lunch')">☀️ Lunch</div>
+        <div class="chip" onclick="setFilter(this,'Dinner')">🌙 Dinner</div>
+        <div class="chip" onclick="setFilter(this,'Soups')">🥣 Soups</div>
+        <div class="chip" onclick="setFilter(this,'Salads')">🥗 Salads</div>
+        <div class="chip" onclick="setFilter(this,'Snacks')">🥜 Snacks</div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="search-input" placeholder="Search recipes, ingredients, tags..." oninput="doSearch()"/>
+      </div>
+    </div>
+
+    <!-- Recipe list -->
+    <div class="recipes-wrap">
+      <div class="list-header">
+        <div class="sec-label" id="list-label">All recipes</div>
+        <div class="count-lbl" id="list-count">6 videos</div>
+      </div>
+      <div class="recipe-list" id="recipe-list"></div>
+    </div>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="switchTab(this)"><span class="nav-icon">🏠</span><span class="nav-lbl">Recipes</span></button>
+    <button class="nav-btn" onclick="switchTab(this)"><span class="nav-icon">⭐</span><span class="nav-lbl">Top Rated</span></button>
+    <button class="nav-btn" onclick="switchTab(this)"><span class="nav-icon">📢</span><span class="nav-lbl">Updates</span></button>
+    <button class="nav-btn" onclick="switchTab(this)"><span class="nav-icon">👤</span><span class="nav-lbl">Profile</span></button>
+  </div>
+</div>
+
+<!-- ══════════════ DETAIL SCREEN ══════════════ -->
+<div class="screen hidden" id="detail-screen">
+  <nav class="detail-nav">
+    <button class="back-btn" onclick="goToApp()">←</button>
+    <div class="detail-nav-title" id="detail-nav-title">Recipe</div>
+  </nav>
+  <div class="detail-body" id="detail-body"></div>
+</div>
+
+<!-- ══════════════ ADMIN PANEL ══════════════ -->
+<div class="panel-overlay" id="panel-overlay" onclick="closePanelOut(event)">
+  <div class="panel">
+    <div class="panel-hdr">
+      <div class="panel-title">Admin Panel</div>
+      <button class="close-btn" onclick="closePanel()">✕</button>
+    </div>
+    <div class="p-tabs">
+      <button class="p-tab active" onclick="pTab(this,'upload-tab')">📹 Upload</button>
+      <button class="p-tab" onclick="pTab(this,'broadcast-tab')">📢 Broadcast</button>
+    </div>
+
+    <!-- Upload tab -->
+    <div id="upload-tab">
+      <div class="form-grp"><label class="form-lbl">Recipe Title</label><input class="f-input" placeholder="e.g. Turmeric Oats Porridge" type="text"/></div>
+      <div class="form-grp"><label class="form-lbl">Category</label>
+        <select class="f-select"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Soups</option><option>Salads</option><option>Snacks</option></select>
+      </div>
+      <div class="form-grp"><label class="form-lbl">YouTube Video URL</label><input class="f-input" placeholder="https://youtube.com/watch?v=..." type="url"/></div>
+      <div class="form-grp"><label class="form-lbl">Nutrition Tags</label><input class="f-input" placeholder="e.g. High fiber, Low sugar, Vegan"/></div>
+      <div class="form-grp"><label class="form-lbl">Duration (mins)</label><input class="f-input" placeholder="2" type="number"/></div>
+      <div class="form-grp"><label class="form-lbl">Notes (optional)</label><textarea class="f-textarea" rows="2" placeholder="Any extra tip for members..."></textarea></div>
+      <button class="pub-btn" onclick="alert('✅ Recipe published! Add the data to your Google Sheet too.')">Publish Recipe</button>
+    </div>
+
+    <!-- Broadcast tab -->
+    <div id="broadcast-tab" style="display:none">
+      <div class="coming-soon">⚠️ Wati.io integration coming in Phase 2. UI is ready — just needs API connection.</div>
+      <div class="bc-box">
+        <div class="bc-hdr">
+          <div class="bc-icon">💬</div>
+          <div class="bc-hdr-txt"><strong>Compose Broadcast</strong><span>Sends to all 100 members via WhatsApp</span></div>
+        </div>
+        <div class="form-lbl" style="margin-bottom:6px">Attach Media</div>
+        <div class="media-row">
+          <button class="media-btn" onclick="simMedia('image')"><span class="media-btn-icon">🖼️</span><span class="media-btn-lbl">Image</span></button>
+          <button class="media-btn" onclick="simMedia('video')"><span class="media-btn-icon">🎥</span><span class="media-btn-lbl">Video</span></button>
+          <button class="media-btn" onclick="simMedia('pdf')"><span class="media-btn-icon">📄</span><span class="media-btn-lbl">PDF</span></button>
+          <button class="media-btn" onclick="toggleEmoji()"><span class="media-btn-icon">😊</span><span class="media-btn-lbl">Emoji</span></button>
+        </div>
+        <div class="media-preview" id="media-preview">
+          <div class="prev-thumb" id="prev-thumb">🖼️</div>
+          <div class="prev-info"><div class="prev-name" id="prev-name">file.jpg</div><div class="prev-size" id="prev-size">Ready to send</div></div>
+          <button class="prev-rm" onclick="removeMedia()">✕</button>
+        </div>
+        <div class="emoji-picker" id="emoji-picker">
+          <div class="ep-title">Health & food emojis</div>
+          <div class="ep-grid" id="ep-grid"></div>
+        </div>
+        <div class="form-lbl" style="margin-bottom:6px">Message</div>
+        <div class="msg-wrap">
+          <div class="msg-toolbar">
+            <button class="tb-btn" style="font-weight:700" onclick="fmt('bold')">B</button>
+            <button class="tb-btn" style="font-style:italic" onclick="fmt('italic')">I</button>
+            <button class="tb-btn" style="text-decoration:line-through" onclick="fmt('strikeThrough')">S</button>
+            <div class="tb-divider"></div>
+            <button class="tb-btn" onclick="tpl('💡 Nutrition Tip:\n\n')">💡 Tip</button>
+            <button class="tb-btn" onclick="tpl('⚠️ Important Update:\n\n')">⚠️ Alert</button>
+            <button class="tb-btn" onclick="tpl('🍽️ New Recipe Alert!\n\n')">🍽️ Recipe</button>
+          </div>
+          <div id="msg-editor" class="msg-editor" contenteditable="true" oninput="updCount()"></div>
+          <div class="msg-footer"><span class="char-cnt" id="char-cnt">0 / 1000</span></div>
+        </div>
+        <div class="sched-row">
+          <label class="tog-track"><input type="checkbox" id="sched-tog" onchange="toggleSched()"/><span class="tog-slider"></span></label>
+          <span class="sched-lbl">Schedule for later</span>
+          <input type="datetime-local" class="sched-input" id="sched-input"/>
+        </div>
+        <button class="wa-send" onclick="sendBc()">📲 Send to All 100 Members</button>
+        <div class="wa-note">✓ Verified members only · Via WhatsApp Business API</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+// TO ADD A NEW RECIPE: copy one object below, change the values, save the file.
+const RECIPES = [
+  {id:1,title:"Oats & Berry Power Bowl",cat:"Breakfast",emoji:"🥣",url:"https://youtube.com/watch?v=example1",tags:["Low sugar","High fiber"],dur:"2:00",rating:4.9,notes:"Great for weight loss and sustained energy throughout the morning."},
+  {id:2,title:"Quinoa & Roasted Veggie Bowl",cat:"Lunch",emoji:"🥗",url:"https://youtube.com/watch?v=example2",tags:["Protein rich","Vegan"],dur:"1:55",rating:4.7,notes:""},
+  {id:3,title:"Lentil & Spinach Detox Soup",cat:"Soups",emoji:"🍲",url:"https://youtube.com/watch?v=example3",tags:["Detox","Iron rich"],dur:"2:00",rating:4.6,notes:"Best served warm. Add a squeeze of lemon for extra flavour."},
+  {id:4,title:"Turmeric Daal with Brown Rice",cat:"Dinner",emoji:"🍛",url:"https://youtube.com/watch?v=example4",tags:["Anti-inflam.","Gut health"],dur:"1:50",rating:4.8,notes:""},
+  {id:5,title:"Peanut Chikki Energy Balls",cat:"Snacks",emoji:"🥜",url:"https://youtube.com/watch?v=example5",tags:["No sugar","Energy"],dur:"1:45",rating:4.5,notes:"Perfect pre-workout snack."},
+  {id:6,title:"Sprouts & Pomegranate Salad",cat:"Salads",emoji:"🥦",url:"https://youtube.com/watch?v=example6",tags:["Raw","Vitamin C"],dur:"2:00",rating:4.9,notes:""},
+];
+const EMOJIS=['🥦','🥗','🍎','🥑','🫐','🍋','🥕','🌿','🍵','💪','❤️','🌟','✅','⚡','🔥','💧','🌱','🧘','🏃','💯','📌','⚠️','💡','🧠','🩺','🍽️','🥣','🍲','🍛','🥜','🫁','👏'];
+
+let currentFilter = 'All';
+let currentSearch = '';
+let ratings = {};
+
+// ── OTP FLOW ──
+function sendOTP(){
+  const ph = document.getElementById('ph-input').value;
+  if(!ph||ph.length<8){alert('Please enter a valid WhatsApp number');return;}
+  document.getElementById('ph-display').textContent = '+91 '+ph;
+  showStep('s-otp');
+  setTimeout(()=>document.querySelectorAll('.otp-box')[0].focus(),100);
+}
+function otpMove(el,idx){
+  if(el.value.length===1){
+    const boxes=document.querySelectorAll('.otp-box');
+    if(idx<3)boxes[idx+1].focus();
+    else verifyOTP();
+  }
+}
+function verifyOTP(){
+  const code=Array.from(document.querySelectorAll('.otp-box')).map(b=>b.value).join('');
+  if(code.length<4){alert('Please enter the 4-digit OTP');return;}
+  showStep('s-success');
+}
+function goBack(){showStep('s-phone');}
+function showStep(id){
+  document.querySelectorAll('.otp-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function enterApp(){
+  document.getElementById('otp-screen').classList.add('slide-left');
+  document.getElementById('app-screen').classList.remove('hidden');
+  renderRecipes();
+}
+
+// ── RECIPE RENDER ──
+function getFiltered(){
+  return RECIPES.filter(r=>{
+    const matchCat = currentFilter==='All'||r.cat===currentFilter;
+    const q = currentSearch.toLowerCase();
+    const matchQ = !q||r.title.toLowerCase().includes(q)||r.cat.toLowerCase().includes(q)||r.tags.join(' ').toLowerCase().includes(q)||r.notes.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+}
+function renderRecipes(){
+  const list = getFiltered();
+  const el = document.getElementById('recipe-list');
+  document.getElementById('list-count').textContent = list.length+' video'+(list.length!==1?'s':'');
+  document.getElementById('list-label').textContent = currentFilter==='All'?'All recipes':'Category: '+currentFilter;
+  document.getElementById('total-count').textContent = RECIPES.length;
+  if(!list.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div><p>No recipes found.<br>Try a different search or filter.</p></div>';
+    return;
+  }
+  el.innerHTML = list.map((r,i)=>`
+    <div class="recipe-card" style="animation-delay:${i*0.06}s" onclick="openDetail(${r.id})">
+      <div class="card-thumb ${r.cat.toLowerCase()}">
+        ${r.emoji}
+        <div class="dur-badge">${r.dur}</div>
+        <div class="play-circle"></div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-cat">${r.cat}</div>
+          <div class="card-title">${r.title}</div>
+        </div>
+        <div>
+          <div class="card-footer">
+            <div class="card-tags">${r.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+            <div class="card-rating"><span class="stars">★★★★★</span> ${ratings[r.id]||r.rating}</div>
+          </div>
+          <div class="rate-row">
+            <span class="rate-lbl">Rate:</span>
+            <div class="star-btns" id="sb-${r.id}">
+              ${[1,2,3,4,5].map(v=>`<button class="sbtn" onclick="rateCard(event,${r.id},${v})">★</button>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function setFilter(el,cat){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter=cat;
+  renderRecipes();
+}
+function doSearch(){
+  currentSearch=document.getElementById('search-input').value;
+  renderRecipes();
+}
+function rateCard(e,id,val){
+  e.stopPropagation();
+  ratings[id]=val.toFixed(1);
+  const btns=document.querySelectorAll(`#sb-${id} .sbtn`);
+  btns.forEach((b,i)=>b.classList.toggle('lit',i<val));
+}
+
+// ── DETAIL SCREEN ──
+function openDetail(id){
+  const r=RECIPES.find(x=>x.id===id);
+  document.getElementById('detail-nav-title').textContent=r.title;
+  document.getElementById('detail-body').innerHTML=`
+    <div class="detail-thumb ${r.cat.toLowerCase()}">
+      ${r.emoji}
+      <div class="video-overlay" onclick="openVideo('${r.url}')"><div class="big-play"></div></div>
+    </div>
+    <div class="detail-content">
+      <div class="detail-cat">${r.cat}</div>
+      <div class="detail-title">${r.title}</div>
+      <div class="detail-tags">${r.tags.map(t=>`<span class="detail-tag">${t}</span>`).join('')}</div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-val">${r.dur}</div><div class="info-key">Duration</div></div>
+        <div class="info-card"><div class="info-val">${ratings[r.id]||r.rating}★</div><div class="info-key">Rating</div></div>
+      </div>
+      <button class="watch-btn" onclick="openVideo('${r.url}')">▶ Watch Recipe Video</button>
+      <button class="share-btn" onclick="shareRecipe('${r.title}')">↗ Share with Friends</button>
+      <div class="rating-section">
+        <div class="rating-title">Rate this recipe</div>
+        <div class="big-stars" id="big-stars-${r.id}">
+          ${[1,2,3,4,5].map(v=>`<span class="big-star" onclick="rateDetail(${r.id},${v})">★</span>`).join('')}
+        </div>
+        <div class="rating-note" id="rating-note-${r.id}">Tap stars to rate</div>
+      </div>
+      ${r.notes?`<div class="notes-section"><div class="notes-title">💡 Admin tip</div><div class="notes-text">${r.notes}</div></div>`:''}
+    </div>`;
+  document.getElementById('app-screen').classList.add('slide-left');
+  document.getElementById('detail-screen').classList.remove('hidden');
+}
+function goToApp(){
+  document.getElementById('detail-screen').classList.add('hidden');
+  document.getElementById('app-screen').classList.remove('slide-left');
+  renderRecipes();
+}
+function openVideo(url){window.open(url,'_blank');}
+function shareRecipe(title){
+  if(navigator.share){navigator.share({title:'WellbeingHub Recipe',text:'Check out this healthy recipe: '+title,url:window.location.href});}
+  else{navigator.clipboard&&navigator.clipboard.writeText(window.location.href);alert('Link copied!');}
+}
+function rateDetail(id,val){
+  ratings[id]=val.toFixed(1);
+  document.querySelectorAll(`#big-stars-${id} .big-star`).forEach((s,i)=>s.classList.toggle('lit',i<val));
+  document.getElementById(`rating-note-${id}`).textContent='Thanks for rating! ⭐'.repeat(val>3?1:0)||'Rating saved';
+}
+
+// ── NAV ──
+function switchTab(el){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── ADMIN PANEL ──
+function openPanel(){
+  document.getElementById('panel-overlay').classList.add('open');
+  buildEmojiGrid();
+}
+function closePanel(){document.getElementById('panel-overlay').classList.remove('open');}
+function closePanelOut(e){if(e.target===document.getElementById('panel-overlay'))closePanel();}
+function pTab(el,tabId){
+  document.querySelectorAll('.p-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('upload-tab').style.display=tabId==='upload-tab'?'block':'none';
+  document.getElementById('broadcast-tab').style.display=tabId==='broadcast-tab'?'block':'none';
+}
+function buildEmojiGrid(){
+  const g=document.getElementById('ep-grid');
+  if(g.children.length)return;
+  EMOJIS.forEach(e=>{const s=document.createElement('span');s.className='ep-item';s.textContent=e;s.onclick=()=>insertEmoji(e);g.appendChild(s);});
+}
+function toggleEmoji(){document.getElementById('emoji-picker').classList.toggle('show');}
+function insertEmoji(e){const ed=document.getElementById('msg-editor');ed.focus();document.execCommand('insertText',false,e);updCount();}
+function simMedia(type){
+  const m={image:['🖼️','nutrition_tips.jpg','320 KB'],video:['🎥','recipe_preview.mp4','1.8 MB'],pdf:['📄','diet_plan.pdf','240 KB']};
+  const [icon,name,size]=m[type];
+  document.getElementById('prev-thumb').textContent=icon;
+  document.getElementById('prev-name').textContent=name;
+  document.getElementById('prev-size').textContent=size+' · Ready to send';
+  document.getElementById('media-preview').classList.add('show');
+}
+function removeMedia(){document.getElementById('media-preview').classList.remove('show');}
+function fmt(cmd){document.getElementById('msg-editor').focus();document.execCommand(cmd,false,null);}
+function tpl(t){document.getElementById('msg-editor').focus();document.execCommand('insertText',false,t);updCount();}
+function updCount(){const l=document.getElementById('msg-editor').innerText.length;document.getElementById('char-cnt').textContent=l+' / 1000';}
+function toggleSched(){const i=document.getElementById('sched-input');i.style.display=document.getElementById('sched-tog').checked?'block':'none';}
+function sendBc(){
+  const msg=document.getElementById('msg-editor').innerText.trim();
+  if(!msg){alert('Please type a message first.');return;}
+  alert('✅ Message queued! Connect Wati.io in Phase 2 to send to all 100 members.');
+}
+</script>
+</body>
+</html>
