@@ -568,7 +568,9 @@ async function sendOTP(){
   } catch(e) {
     btn.textContent = '📲 Send OTP on WhatsApp';
     btn.disabled = false;
-    alert('Connection error. Please check your internet and try again.');
+    const msg = document.getElementById('not-member-msg');
+    msg.style.display='block';
+    msg.innerHTML = '⚠️ <strong>Could not verify membership.</strong><br/>Please check your internet connection and try again. If the problem persists, contact your admin.';
   }
 }
 
