@@ -310,7 +310,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
       <div id="other-cc-wrap" style="display:none;margin-bottom:10px">
         <input class="f-input" id="other-cc" placeholder="Enter country code e.g. +123" type="tel" style="margin-bottom:0"/>
       </div>
-      <button class="otp-btn wa" onclick="sendOTP()">📲 Send OTP on WhatsApp</button>
+      <button class="otp-btn wa" id="send-otp-btn" onclick="sendOTP()">📲 Send OTP on WhatsApp</button>
       <div class="otp-note">You'll stay logged in for <strong>30 days</strong> after verification.</div>
     </div>
     <!-- Step 2: OTP -->
@@ -569,7 +569,7 @@ async function sendOTP(){
   const cc = getCCode();
   if(!ph||ph.length<5){alert('Please enter a valid phone number');return;}
   if(cc==='other'||!cc){alert('Please enter a valid country code');return;}
-  const btn = document.querySelector('.otp-btn.wa');
+  const btn = document.getElementById('send-otp-btn');
   btn.textContent = '⏳ Checking membership...';
   btn.disabled = true;
   try {
@@ -625,11 +625,13 @@ function verifyOTP(){
   showStep('s-success');
 }
 function goBack(){
-  showStep('s-phone');
-  const btn = document.querySelector('.otp-btn.wa');
+  // Reset button BEFORE switching step
+  const btn = document.getElementById('send-otp-btn');
   btn.textContent = '📲 Send OTP on WhatsApp';
   btn.disabled = false;
   document.getElementById('not-member-msg').style.display='none';
+  document.getElementById('ph-input').value='';
+  showStep('s-phone');
 }
 function showStep(id){
   document.querySelectorAll('.otp-step').forEach(s=>s.classList.remove('active'));
