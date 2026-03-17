@@ -624,7 +624,13 @@ function verifyOTP(){
   if(code.length<4){alert('Please enter the 4-digit OTP');return;}
   showStep('s-success');
 }
-function goBack(){showStep('s-phone');}
+function goBack(){
+  showStep('s-phone');
+  const btn = document.querySelector('.otp-btn.wa');
+  btn.textContent = '📲 Send OTP on WhatsApp';
+  btn.disabled = false;
+  document.getElementById('not-member-msg').style.display='none';
+}
 function showStep(id){
   document.querySelectorAll('.otp-step').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
