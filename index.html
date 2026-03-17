@@ -378,6 +378,10 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
       </div>
       <button class="otp-btn wa" id="send-otp-btn" onclick="sendOTP()">📲 Send OTP on WhatsApp</button>
       <div class="otp-note">You'll stay logged in for <strong>30 days</strong> after verification.</div>
+      <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <span style="font-size:12px;color:var(--muted)">Are you the admin? </span>
+        <span onclick="adminLogin()" style="font-size:12px;color:var(--green);font-weight:500;cursor:pointer;text-decoration:underline">Admin Login →</span>
+      </div>
     </div>
     <!-- Step 2: OTP -->
     <div class="otp-step" id="s-otp">
@@ -899,8 +903,15 @@ function changePassword(){
 // ── ADMIN SCREEN ──
 function exitAdmin(){
   document.getElementById('admin-screen').classList.add('hidden');
-  document.getElementById('app-screen').classList.remove('slide-left');
-  renderRecipes();
+  // Go back to wherever admin came from
+  if(!document.getElementById('app-screen').classList.contains('slide-left')){
+    // Came from OTP screen
+    document.getElementById('otp-screen').classList.remove('slide-left');
+  } else {
+    // Came from app screen
+    document.getElementById('app-screen').classList.remove('slide-left');
+    renderRecipes();
+  }
 }
 
 function adminTab(el, tabId){
@@ -984,6 +995,25 @@ function renderAdminMembers(){
       </div>
       <span class="member-status ${m.active?'active':'inactive'}">${m.active?'Active':'Inactive'}</span>
     </div>`).join('');
+}
+
+
+// ── ADMIN LOGIN FROM OTP SCREEN ──
+function adminLogin(){
+  const pwd = prompt('🔐 Enter Admin Password:');
+  if(pwd === null) return;
+  if(pwd !== adminPassword){
+    alert('❌ Incorrect password.');
+    return;
+  }
+  // Go directly to admin screen from OTP screen
+  document.getElementById('otp-screen').classList.add('slide-left');
+  document.getElementById('admin-screen').classList.remove('hidden');
+  renderAdminRecipes();
+  renderAdminMembers();
+  document.getElementById('a-recipes').textContent = RECIPES.length;
+  document.getElementById('info-count').textContent = RECIPES.length;
+  buildEmojiGrid();
 }
 
 </script>
