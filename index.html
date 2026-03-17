@@ -266,6 +266,72 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
   .wa-tip{margin:20px 60px 0}
   .hero{padding:48px 60px 40px}
 }
+
+/* ── ADMIN SCREEN ── */
+#admin-screen{background:#f7f4ef}
+.admin-nav{background:var(--green-dark);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.admin-nav-left{display:flex;align-items:center;gap:12px}
+.admin-back{background:rgba(255,255,255,0.15);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.admin-nav-title{font-family:'Playfair Display',serif;color:white;font-size:18px}
+.admin-badge{background:var(--amber);color:var(--brown);font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px}
+.admin-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 24px 40px}
+
+/* admin stats row */
+.admin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.admin-stat-card{background:white;border-radius:12px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.admin-stat-num{font-size:22px;font-weight:700;font-family:'Playfair Display',serif;color:var(--green)}
+.admin-stat-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* admin tabs */
+.admin-tabs{display:flex;gap:4px;background:white;border-radius:12px;padding:4px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.admin-tab{flex:1;text-align:center;padding:10px 4px;border-radius:9px;font-size:12px;cursor:pointer;border:none;background:none;font-family:'DM Sans',sans-serif;color:var(--muted);transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:3px}
+.admin-tab-icon{font-size:18px}
+.admin-tab.active{background:var(--green);color:white;font-weight:500}
+.admin-tab-content{display:none}
+.admin-tab-content.active{display:block}
+
+/* recipe management */
+.recipe-mgmt-card{background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.recipe-mgmt-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.recipe-mgmt-title{font-size:15px;font-weight:500;font-family:'Playfair Display',serif}
+.add-recipe-btn{background:var(--green);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:5px}
+
+.recipe-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.recipe-row:last-child{border-bottom:none}
+.recipe-row-emoji{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.recipe-row-info{flex:1}
+.recipe-row-title{font-size:13px;font-weight:500;color:var(--brown)}
+.recipe-row-cat{font-size:11px;color:var(--muted)}
+.recipe-row-actions{display:flex;gap:6px}
+.row-btn{border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500}
+.row-btn.edit{background:#EFF6FF;color:#1D4ED8}
+.row-btn.hide{background:var(--amber-pale);color:#92400E}
+.row-btn.del{background:#FEE2E2;color:#991B1B}
+
+/* add recipe form */
+.add-form{display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;margin-top:12px}
+.add-form.show{display:block}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* broadcast */
+.bc-full{background:white;border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+
+/* members */
+.members-card{background:white;border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.member-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.member-row:last-child{border-bottom:none}
+.member-avatar{width:36px;height:36px;border-radius:50%;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;color:var(--green);font-weight:700;font-size:13px}
+.member-info{flex:1}
+.member-name{font-size:13px;font-weight:500}
+.member-num{font-size:11px;color:var(--muted)}
+.member-status{font-size:10px;font-weight:500;padding:3px 8px;border-radius:100px}
+.member-status.active{background:#D1FAE5;color:#166534}
+.member-status.inactive{background:#FEE2E2;color:#991B1B}
+
+/* settings */
+.settings-card{background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.settings-card-title{font-size:14px;font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
 </style>
 </head>
 <body>
@@ -767,7 +833,13 @@ function openPanel(){
     alert('❌ Incorrect password. Members cannot access the admin panel.');
     return;
   }
-  document.getElementById('panel-overlay').classList.add('open');
+  // Navigate to full admin screen
+  document.getElementById('app-screen').classList.add('slide-left');
+  document.getElementById('admin-screen').classList.remove('hidden');
+  renderAdminRecipes();
+  renderAdminMembers();
+  document.getElementById('a-recipes').textContent = RECIPES.length;
+  document.getElementById('info-count').textContent = RECIPES.length;
   buildEmojiGrid();
 }
 function closePanel(){document.getElementById('panel-overlay').classList.remove('open');}
@@ -823,6 +895,261 @@ function changePassword(){
   document.getElementById('conf-pwd').value='';
   setTimeout(()=>msg.textContent='',3000);
 }
+
+// ── ADMIN SCREEN ──
+function exitAdmin(){
+  document.getElementById('admin-screen').classList.add('hidden');
+  document.getElementById('app-screen').classList.remove('slide-left');
+  renderRecipes();
+}
+
+function adminTab(el, tabId){
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.admin-tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+function toggleAddForm(){
+  document.getElementById('add-form').classList.toggle('show');
+}
+
+function renderAdminRecipes(){
+  const list = document.getElementById('admin-recipe-list');
+  list.innerHTML = RECIPES.map(r=>`
+    <div class="recipe-row">
+      <div class="recipe-row-emoji ${r.cat.toLowerCase()}" style="background:${getCatBg(r.cat)}">${r.emoji}</div>
+      <div class="recipe-row-info">
+        <div class="recipe-row-title">${r.title}</div>
+        <div class="recipe-row-cat">${r.cat} · ${r.dur}</div>
+      </div>
+      <div class="recipe-row-actions">
+        <button class="row-btn hide" onclick="toggleRecipe(${r.id})">👁️</button>
+        <button class="row-btn del" onclick="deleteRecipe(${r.id})">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+function getCatBg(cat){
+  const map={Breakfast:'#FEF3C7',Lunch:'#D1FAE5',Dinner:'#E0E7FF',Soups:'#FCE7F3',Salads:'#ECFDF5',Snacks:'#FEF3C7'};
+  return map[cat]||'#f3f4f6';
+}
+
+function toggleRecipe(id){
+  alert('In Phase 2 this will show/hide the recipe for members. For now update Active column in Google Sheet.');
+}
+
+function deleteRecipe(id){
+  if(!confirm('Delete this recipe? This cannot be undone.')) return;
+  const idx = RECIPES.findIndex(r=>r.id===id);
+  if(idx>-1){ RECIPES.splice(idx,1); renderAdminRecipes(); document.getElementById('a-recipes').textContent=RECIPES.length; }
+}
+
+function addRecipe(){
+  const title = document.getElementById('new-title').value.trim();
+  const cat = document.getElementById('new-cat').value;
+  const dur = document.getElementById('new-dur').value.trim() || '2:00';
+  const url = document.getElementById('new-url').value.trim();
+  const tags = document.getElementById('new-tags').value.trim().split(',').map(t=>t.trim()).filter(Boolean);
+  const notes = document.getElementById('new-notes').value.trim();
+  if(!title){ alert('Please enter a recipe title'); return; }
+  const emojis={Breakfast:'🥣',Lunch:'🥗',Dinner:'🍛',Soups:'🍲',Salads:'🥦',Snacks:'🥜'};
+  const newId = RECIPES.length ? Math.max(...RECIPES.map(r=>r.id))+1 : 1;
+  RECIPES.push({id:newId,title,cat,emoji:emojis[cat]||'🍽️',url:url||'#',tags,dur,rating:0,notes});
+  document.getElementById('new-title').value='';
+  document.getElementById('new-url').value='';
+  document.getElementById('new-tags').value='';
+  document.getElementById('new-notes').value='';
+  document.getElementById('add-form').classList.remove('show');
+  renderAdminRecipes();
+  document.getElementById('a-recipes').textContent=RECIPES.length;
+  alert('✅ Recipe added! Also update your Google Sheet to make it permanent.');
+}
+
+function renderAdminMembers(){
+  const sampleMembers = [
+    {name:'Priya Sharma', num:'+91 98765 43210', country:'🇮🇳', active:true},
+    {name:'Rahul Verma', num:'+91 97654 32109', country:'🇮🇳', active:true},
+    {name:'Ahmed Al Farsi', num:'+971 50 123 4567', country:'🇦🇪', active:true},
+    {name:'Sara Johnson', num:'+44 7911 123456', country:'🇬🇧', active:true},
+    {name:'John Smith', num:'+1 202 555 1234', country:'🇺🇸', active:false},
+  ];
+  const list = document.getElementById('admin-members-list');
+  list.innerHTML = sampleMembers.map(m=>`
+    <div class="member-row">
+      <div class="member-avatar">${m.name.split(' ').map(n=>n[0]).join('')}</div>
+      <div class="member-info">
+        <div class="member-name">${m.country} ${m.name}</div>
+        <div class="member-num">${m.num}</div>
+      </div>
+      <span class="member-status ${m.active?'active':'inactive'}">${m.active?'Active':'Inactive'}</span>
+    </div>`).join('');
+}
+
 </script>
+
+<!-- ══════════════ ADMIN SCREEN ══════════════ -->
+<div class="screen hidden" id="admin-screen">
+  <nav class="admin-nav">
+    <div class="admin-nav-left">
+      <button class="admin-back" onclick="exitAdmin()">←</button>
+      <div class="admin-nav-title">Admin Panel</div>
+    </div>
+    <div class="admin-badge">⚙️ ADMIN</div>
+  </nav>
+
+  <div class="admin-body">
+
+    <!-- Stats -->
+    <div class="admin-stats">
+      <div class="admin-stat-card">
+        <div class="admin-stat-num" id="a-recipes">6</div>
+        <div class="admin-stat-lbl">Recipes</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num">100</div>
+        <div class="admin-stat-lbl">Members</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num">4.8★</div>
+        <div class="admin-stat-lbl">Avg Rating</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="adminTab(this,'tab-recipes')">
+        <span class="admin-tab-icon">📹</span>Recipes
+      </button>
+      <button class="admin-tab" onclick="adminTab(this,'tab-broadcast')">
+        <span class="admin-tab-icon">📢</span>Broadcast
+      </button>
+      <button class="admin-tab" onclick="adminTab(this,'tab-members')">
+        <span class="admin-tab-icon">👥</span>Members
+      </button>
+      <button class="admin-tab" onclick="adminTab(this,'tab-settings')">
+        <span class="admin-tab-icon">⚙️</span>Settings
+      </button>
+    </div>
+
+    <!-- RECIPES TAB -->
+    <div class="admin-tab-content active" id="tab-recipes">
+      <div class="recipe-mgmt-card">
+        <div class="recipe-mgmt-hdr">
+          <div class="recipe-mgmt-title">All Recipes</div>
+          <button class="add-recipe-btn" onclick="toggleAddForm()">＋ Add Recipe</button>
+        </div>
+
+        <!-- Add Recipe Form -->
+        <div class="add-form" id="add-form">
+          <div class="form-grp"><label class="form-lbl">Recipe Title</label><input class="f-input" id="new-title" placeholder="e.g. Turmeric Oats Porridge"/></div>
+          <div class="form-row">
+            <div class="form-grp"><label class="form-lbl">Category</label>
+              <select class="f-select" id="new-cat"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Soups</option><option>Salads</option><option>Snacks</option></select>
+            </div>
+            <div class="form-grp"><label class="form-lbl">Duration</label><input class="f-input" id="new-dur" placeholder="2:00"/></div>
+          </div>
+          <div class="form-grp"><label class="form-lbl">YouTube URL</label><input class="f-input" id="new-url" placeholder="https://youtube.com/watch?v=..."/></div>
+          <div class="form-grp"><label class="form-lbl">Nutrition Tags</label><input class="f-input" id="new-tags" placeholder="High fiber, Low sugar"/></div>
+          <div class="form-grp"><label class="form-lbl">Notes</label><input class="f-input" id="new-notes" placeholder="Optional tip for members"/></div>
+          <div style="display:flex;gap:8px">
+            <button class="pub-btn" style="flex:1" onclick="addRecipe()">✅ Publish Recipe</button>
+            <button class="pub-btn" style="flex:0;background:#6b7280;padding:13px 16px" onclick="toggleAddForm()">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Recipe list -->
+        <div id="admin-recipe-list"></div>
+      </div>
+    </div>
+
+    <!-- BROADCAST TAB -->
+    <div class="admin-tab-content" id="tab-broadcast">
+      <div class="bc-full">
+        <div class="coming-soon">⚠️ Wati.io integration coming in Phase 2. UI ready — needs API connection.</div>
+        <div class="bc-hdr" style="margin-bottom:14px">
+          <div class="bc-icon">💬</div>
+          <div class="bc-hdr-txt"><strong>Compose Broadcast</strong><span>Sends to all 100 members via WhatsApp</span></div>
+        </div>
+        <div class="form-lbl" style="margin-bottom:6px">Attach Media</div>
+        <div class="media-row">
+          <button class="media-btn" onclick="simMedia('image')"><span class="media-btn-icon">🖼️</span><span class="media-btn-lbl">Image</span></button>
+          <button class="media-btn" onclick="simMedia('video')"><span class="media-btn-icon">🎥</span><span class="media-btn-lbl">Video</span></button>
+          <button class="media-btn" onclick="simMedia('pdf')"><span class="media-btn-icon">📄</span><span class="media-btn-lbl">PDF</span></button>
+          <button class="media-btn" onclick="toggleEmoji()"><span class="media-btn-icon">😊</span><span class="media-btn-lbl">Emoji</span></button>
+        </div>
+        <div class="media-preview" id="media-preview">
+          <div class="prev-thumb" id="prev-thumb">🖼️</div>
+          <div class="prev-info"><div class="prev-name" id="prev-name">file.jpg</div><div class="prev-size" id="prev-size">Ready to send</div></div>
+          <button class="prev-rm" onclick="removeMedia()">✕</button>
+        </div>
+        <div class="emoji-picker" id="emoji-picker">
+          <div class="ep-title">Health & food emojis</div>
+          <div class="ep-grid" id="ep-grid"></div>
+        </div>
+        <div class="form-lbl" style="margin-bottom:6px">Message</div>
+        <div class="msg-wrap">
+          <div class="msg-toolbar">
+            <button class="tb-btn" style="font-weight:700" onclick="fmt('bold')">B</button>
+            <button class="tb-btn" style="font-style:italic" onclick="fmt('italic')">I</button>
+            <button class="tb-btn" style="text-decoration:line-through" onclick="fmt('strikeThrough')">S</button>
+            <div class="tb-divider"></div>
+            <button class="tb-btn" onclick="tpl('💡 Nutrition Tip:\n\n')">💡 Tip</button>
+            <button class="tb-btn" onclick="tpl('⚠️ Important Update:\n\n')">⚠️ Alert</button>
+            <button class="tb-btn" onclick="tpl('🍽️ New Recipe Alert!\n\n')">🍽️ Recipe</button>
+          </div>
+          <div id="msg-editor" class="msg-editor" contenteditable="true" oninput="updCount()"></div>
+          <div class="msg-footer"><span class="char-cnt" id="char-cnt">0 / 1000</span></div>
+        </div>
+        <div class="sched-row">
+          <label class="tog-track"><input type="checkbox" id="sched-tog" onchange="toggleSched()"/><span class="tog-slider"></span></label>
+          <span class="sched-lbl">Schedule for later</span>
+          <input type="datetime-local" class="sched-input" id="sched-input"/>
+        </div>
+        <button class="wa-send" onclick="sendBc()">📲 Send to All 100 Members</button>
+        <div class="wa-note">✓ Verified members only · Via WhatsApp Business API</div>
+      </div>
+    </div>
+
+    <!-- MEMBERS TAB -->
+    <div class="admin-tab-content" id="tab-members">
+      <div class="members-card">
+        <div class="recipe-mgmt-hdr">
+          <div class="recipe-mgmt-title">Community Members</div>
+          <span style="font-size:12px;color:var(--muted)">Managed via Google Sheet</span>
+        </div>
+        <div id="admin-members-list"></div>
+        <div style="margin-top:12px;padding:10px;background:var(--green-pale);border-radius:8px;font-size:12px;color:var(--green);text-align:center">
+          ✅ To add/remove members update your Google Sheet directly
+        </div>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="admin-tab-content" id="tab-settings">
+      <div class="settings-card">
+        <div class="settings-card-title">🔐 Change Admin Password</div>
+        <div class="form-grp"><label class="form-lbl">Current Password</label><input class="f-input" id="curr-pwd" type="password" placeholder="Enter current password"/></div>
+        <div class="form-grp"><label class="form-lbl">New Password</label><input class="f-input" id="new-pwd" type="password" placeholder="Min 6 characters"/></div>
+        <div class="form-grp"><label class="form-lbl">Confirm New Password</label><input class="f-input" id="conf-pwd" type="password" placeholder="Re-enter new password"/></div>
+        <div id="pwd-msg" style="font-size:12px;margin-bottom:10px;min-height:18px"></div>
+        <button class="pub-btn" onclick="changePassword()">🔐 Update Password</button>
+      </div>
+      <div class="settings-card">
+        <div class="settings-card-title">ℹ️ App Info</div>
+        <div style="font-size:13px;color:var(--muted);line-height:2">
+          👥 Community: 100 members<br/>
+          📹 Recipes: <span id="info-count">6</span> videos<br/>
+          🔒 Auth: WhatsApp OTP (Phase 2)<br/>
+          📢 Broadcast: Wati.io (Phase 2)<br/>
+          🌐 Hosting: GitHub Pages · Free<br/>
+          📊 Database: Google Sheets · Free
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
 </body>
 </html>
