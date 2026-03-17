@@ -27,11 +27,11 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .screen.slide-left{transform:translateX(-100%);opacity:0;pointer-events:none}
 
 /* ── OTP SCREEN ── */
-#otp-screen{justify-content:center;align-items:center;padding:32px 24px;background:linear-gradient(160deg,#f7f4ef 60%,#d8f3dc)}
+#otp-screen{justify-content:center;align-items:center;padding:32px 24px;background:linear-gradient(160deg,#f7f4ef 60%,#d8f3dc);min-height:100vh;width:100%}
 .otp-logo{font-family:'Playfair Display',serif;font-size:32px;color:var(--green);text-align:center;margin-bottom:4px}
 .otp-logo span{color:var(--green2)}
 .otp-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:36px}
-.otp-card{background:white;border-radius:24px;padding:28px 24px;width:100%;box-shadow:0 8px 32px rgba(0,0,0,0.08)}
+.otp-card{background:white;border-radius:24px;padding:28px 24px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,0.08)}
 .otp-step{display:none}.otp-step.active{display:block}
 .session-pill{display:inline-flex;align-items:center;gap:5px;background:var(--green-pale);color:var(--green);font-size:11px;font-weight:500;padding:4px 12px;border-radius:100px;margin-bottom:16px}
 .otp-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:6px}
