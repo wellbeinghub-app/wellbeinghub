@@ -842,6 +842,7 @@ function openPanel(){
   document.getElementById('admin-screen').classList.remove('hidden');
   renderAdminRecipes();
   renderAdminMembers();
+  renderCategories();
   document.getElementById('a-recipes').textContent = RECIPES.length;
   document.getElementById('info-count').textContent = RECIPES.length;
   buildEmojiGrid();
@@ -926,17 +927,30 @@ function toggleAddForm(){
 }
 
 function renderAdminRecipes(){
+  const q = (document.getElementById('admin-search')?.value||'').toLowerCase();
+  const cat = document.getElementById('admin-cat-filter')?.value||'All';
+  const filtered = RECIPES.filter(r=>{
+    const matchQ = !q||r.title.toLowerCase().includes(q)||r.tags.join(' ').toLowerCase().includes(q);
+    const matchC = cat==='All'||r.cat===cat;
+    return matchQ && matchC;
+  });
+  const countEl = document.getElementById('admin-recipe-count');
+  if(countEl) countEl.textContent = filtered.length + ' of ' + RECIPES.length + ' recipes';
   const list = document.getElementById('admin-recipe-list');
-  list.innerHTML = RECIPES.map(r=>`
+  if(!filtered.length){
+    list.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">🔍 No recipes found</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(r=>`
     <div class="recipe-row">
-      <div class="recipe-row-emoji ${r.cat.toLowerCase()}" style="background:${getCatBg(r.cat)}">${r.emoji}</div>
+      <div class="recipe-row-emoji" style="background:${getCatBg(r.cat)};width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${r.emoji}</div>
       <div class="recipe-row-info">
         <div class="recipe-row-title">${r.title}</div>
         <div class="recipe-row-cat">${r.cat} · ${r.dur}</div>
       </div>
       <div class="recipe-row-actions">
-        <button class="row-btn hide" onclick="toggleRecipe(${r.id})">👁️</button>
-        <button class="row-btn del" onclick="deleteRecipe(${r.id})">🗑️</button>
+        <button class="row-btn hide" onclick="toggleRecipe(${r.id})" title="Show/Hide"">👁️</button>
+        <button class="row-btn del" onclick="deleteRecipe(${r.id})" title="Delete">🗑️</button>
       </div>
     </div>`).join('');
 }
@@ -977,24 +991,78 @@ function addRecipe(){
   alert('✅ Recipe added! Also update your Google Sheet to make it permanent.');
 }
 
+
+// Members stored in memory (sync with Google Sheet manually)
+let MEMBERS = [
+  {id:1, name:'Priya Sharma',   num:'+919876543210', country:'India 🇮🇳',   active:true},
+  {id:2, name:'Rahul Verma',    num:'+919765432109', country:'India 🇮🇳',   active:true},
+  {id:3, name:'Ahmed Al Farsi', num:'+971501234567', country:'UAE 🇦🇪',     active:true},
+  {id:4, name:'Sara Johnson',   num:'+447911123456', country:'UK 🇬🇧',      active:true},
+  {id:5, name:'John Smith',     num:'+12025551234',  country:'USA 🇺🇸',     active:false},
+];
+
 function renderAdminMembers(){
-  const sampleMembers = [
-    {name:'Priya Sharma', num:'+91 98765 43210', country:'🇮🇳', active:true},
-    {name:'Rahul Verma', num:'+91 97654 32109', country:'🇮🇳', active:true},
-    {name:'Ahmed Al Farsi', num:'+971 50 123 4567', country:'🇦🇪', active:true},
-    {name:'Sara Johnson', num:'+44 7911 123456', country:'🇬🇧', active:true},
-    {name:'John Smith', num:'+1 202 555 1234', country:'🇺🇸', active:false},
-  ];
+  const q = (document.getElementById('member-search')?.value||'').toLowerCase();
+  const filtered = MEMBERS.filter(m=>
+    !q || m.name.toLowerCase().includes(q) || m.num.includes(q)
+  );
+  const countEl = document.getElementById('member-count');
+  if(countEl) countEl.textContent = filtered.length + ' of ' + MEMBERS.length + ' members';
   const list = document.getElementById('admin-members-list');
-  list.innerHTML = sampleMembers.map(m=>`
-    <div class="member-row">
+  if(!filtered.length){
+    list.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">🔍 No members found</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(m=>`
+    <div class="member-row" id="mrow-${m.id}">
       <div class="member-avatar">${m.name.split(' ').map(n=>n[0]).join('')}</div>
       <div class="member-info">
         <div class="member-name">${m.country} ${m.name}</div>
         <div class="member-num">${m.num}</div>
       </div>
-      <span class="member-status ${m.active?'active':'inactive'}">${m.active?'Active':'Inactive'}</span>
-    </div>`).join('');
+      <div style="display:flex;gap:5px;align-items:center">
+        <span class="member-status ${m.active?'active':'inactive'}" style="cursor:pointer" onclick="toggleMember(${m.id})">${m.active?'Active':'Inactive'}</span>
+        <button class="row-btn del" onclick="removeMember(${m.id})" title="Remove">🗑️</button>
+      </div>
+    </div>`).join('') +
+    `<div style="margin-top:10px;padding:8px 10px;background:var(--amber-pale);border-radius:8px;font-size:11px;color:#92400E">
+      ⚠️ Changes here are temporary. Update your Google Sheet to make them permanent.
+    </div>`;
+}
+
+function toggleMember(id){
+  const m = MEMBERS.find(x=>x.id===id);
+  if(!m) return;
+  m.active = !m.active;
+  renderAdminMembers();
+}
+
+function removeMember(id){
+  const m = MEMBERS.find(x=>x.id===id);
+  if(!confirm('Remove ' + m.name + ' from community?')) return;
+  MEMBERS = MEMBERS.filter(x=>x.id!==id);
+  renderAdminMembers();
+  alert('✅ Removed! Also delete their number from Google Sheet Column C.');
+}
+
+function toggleMemberForm(){
+  document.getElementById('member-form').classList.toggle('show');
+}
+
+function addMember(){
+  const name = document.getElementById('new-m-name').value.trim();
+  const num = document.getElementById('new-m-num').value.trim();
+  const country = document.getElementById('new-m-country').value;
+  if(!name){ alert('Please enter member name'); return; }
+  if(!num){ alert('Please enter WhatsApp number'); return; }
+  if(!num.startsWith('+')){ alert('Number must start with country code e.g. +91'); return; }
+  const newId = MEMBERS.length ? Math.max(...MEMBERS.map(m=>m.id))+1 : 1;
+  MEMBERS.push({id:newId, name, num, country, active:true});
+  document.getElementById('new-m-name').value='';
+  document.getElementById('new-m-num').value='';
+  document.getElementById('member-form').classList.remove('show');
+  renderAdminMembers();
+  alert('✅ Member added! Also add +' + num + ' to Google Sheet Column C to enable their login.');
 }
 
 
@@ -1011,9 +1079,70 @@ function adminLogin(){
   document.getElementById('admin-screen').classList.remove('hidden');
   renderAdminRecipes();
   renderAdminMembers();
+  renderCategories();
   document.getElementById('a-recipes').textContent = RECIPES.length;
   document.getElementById('info-count').textContent = RECIPES.length;
   buildEmojiGrid();
+}
+
+
+// ── CATEGORY MANAGEMENT ──
+let CATEGORIES = [
+  {name:'Breakfast', emoji:'🌅'},
+  {name:'Lunch', emoji:'☀️'},
+  {name:'Dinner', emoji:'🌙'},
+  {name:'Soups', emoji:'🥣'},
+  {name:'Salads', emoji:'🥗'},
+  {name:'Snacks', emoji:'🥜'},
+];
+
+function toggleCatForm(){
+  document.getElementById('cat-form').classList.toggle('show');
+}
+
+function renderCategories(){
+  const list = document.getElementById('cat-list');
+  if(!list) return;
+  list.innerHTML = CATEGORIES.map((c,i)=>`
+    <div class="recipe-row">
+      <div style="width:36px;height:36px;border-radius:8px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${c.emoji}</div>
+      <div class="recipe-row-info">
+        <div class="recipe-row-title">${c.name}</div>
+        <div class="recipe-row-cat">${RECIPES.filter(r=>r.cat===c.name).length} recipes</div>
+      </div>
+      <div class="recipe-row-actions">
+        ${i>=6?`<button class="row-btn del" onclick="removeCategory(${i})" title="Remove">🗑️</button>`:'<span style="font-size:10px;color:var(--muted)">Default</span>'}
+      </div>
+    </div>`).join('');
+}
+
+function addCategory(){
+  const name = document.getElementById('new-cat-name').value.trim();
+  const emoji = document.getElementById('new-cat-emoji').value.trim() || '🍽️';
+  if(!name){ alert('Please enter category name'); return; }
+  if(CATEGORIES.find(c=>c.name.toLowerCase()===name.toLowerCase())){ alert('Category already exists!'); return; }
+  CATEGORIES.push({name, emoji});
+  // Add to all category dropdowns
+  ['new-cat','admin-cat-filter'].forEach(id=>{
+    const sel = document.getElementById(id);
+    if(sel){ const opt=document.createElement('option'); opt.value=name; opt.textContent=name; sel.appendChild(opt); }
+  });
+  // Add chip to member view
+  const chips = document.getElementById('chips');
+  if(chips){ const chip=document.createElement('div'); chip.className='chip'; chip.textContent=emoji+' '+name; chip.onclick=function(){setFilter(this,name);}; chips.appendChild(chip); }
+  document.getElementById('new-cat-name').value='';
+  document.getElementById('new-cat-emoji').value='';
+  document.getElementById('cat-form').classList.remove('show');
+  renderCategories();
+  alert('✅ Category '+name+' added!');
+}
+
+function removeCategory(idx){
+  const cat = CATEGORIES[idx];
+  if(RECIPES.find(r=>r.cat===cat.name)){ alert('Cannot remove — '+cat.name+' has recipes. Move recipes to another category first.'); return; }
+  if(!confirm('Remove category '+cat.name+'?')) return;
+  CATEGORIES.splice(idx,1);
+  renderCategories();
 }
 
 </script>
@@ -1070,12 +1199,52 @@ function adminLogin(){
           <button class="add-recipe-btn" onclick="toggleAddForm()">＋ Add Recipe</button>
         </div>
 
+        <!-- Filter & Search bar -->
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <div class="search-box" style="flex:1">
+            <span class="search-icon">🔍</span>
+            <input class="search-input" id="admin-recipe-search" placeholder="Search recipes..." oninput="filterAdminRecipes()"/>
+          </div>
+          <select class="f-select" id="admin-cat-filter" onchange="filterAdminRecipes()" style="width:130px;padding:10px 8px;font-size:12px">
+            <option value="All">All Categories</option>
+            <option>Breakfast</option>
+            <option>Lunch</option>
+            <option>Dinner</option>
+            <option>Soups</option>
+            <option>Salads</option>
+            <option>Snacks</option>
+          </select>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">
+          Showing <span id="admin-recipe-count">0</span> recipes
+        </div>
+
+        <!-- Search + Filter row -->
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <div style="flex:1;display:flex;align-items:center;gap:6px;background:#f3f4f6;border-radius:10px;padding:8px 12px">
+            <span style="font-size:13px">🔍</span>
+            <input id="admin-search" style="border:none;outline:none;background:transparent;font-size:13px;font-family:DM Sans,sans-serif;width:100%" placeholder="Search recipes..." oninput="renderAdminRecipes()"/>
+          </div>
+          <select id="admin-cat-filter" style="border:1.5px solid var(--border);border-radius:10px;padding:8px 10px;font-size:12px;font-family:DM Sans,sans-serif;outline:none;background:white" onchange="renderAdminRecipes()">
+            <option value="All">All Categories</option>
+            <option>Breakfast</option>
+            <option>Lunch</option>
+            <option>Dinner</option>
+            <option>Soups</option>
+            <option>Salads</option>
+            <option>Snacks</option>
+          </select>
+        </div>
+
         <!-- Add Recipe Form -->
         <div class="add-form" id="add-form">
           <div class="form-grp"><label class="form-lbl">Recipe Title</label><input class="f-input" id="new-title" placeholder="e.g. Turmeric Oats Porridge"/></div>
           <div class="form-row">
             <div class="form-grp"><label class="form-lbl">Category</label>
-              <select class="f-select" id="new-cat"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Soups</option><option>Salads</option><option>Snacks</option></select>
+              <select class="f-select" id="new-cat">
+                <option>Breakfast</option><option>Lunch</option><option>Dinner</option>
+                <option>Soups</option><option>Salads</option><option>Snacks</option>
+              </select>
             </div>
             <div class="form-grp"><label class="form-lbl">Duration</label><input class="f-input" id="new-dur" placeholder="2:00"/></div>
           </div>
@@ -1088,8 +1257,27 @@ function adminLogin(){
           </div>
         </div>
 
+        <!-- Recipe count -->
+        <div id="admin-recipe-count" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
+
         <!-- Recipe list -->
         <div id="admin-recipe-list"></div>
+      </div>
+
+      <!-- Manage Categories -->
+      <div class="recipe-mgmt-card" style="margin-top:12px">
+        <div class="recipe-mgmt-hdr">
+          <div class="recipe-mgmt-title">📂 Manage Categories</div>
+          <button class="add-recipe-btn" onclick="toggleCatForm()">＋ Add Category</button>
+        </div>
+        <div class="add-form" id="cat-form">
+          <div style="display:flex;gap:8px">
+            <input class="f-input" id="new-cat-name" placeholder="e.g. Juices" style="flex:1"/>
+            <input class="f-input" id="new-cat-emoji" placeholder="🥤" style="width:60px;text-align:center"/>
+            <button class="pub-btn" style="flex:0;padding:11px 14px;margin:0" onclick="addCategory()">Add</button>
+          </div>
+        </div>
+        <div id="cat-list"></div>
       </div>
     </div>
 
@@ -1146,12 +1334,44 @@ function adminLogin(){
       <div class="members-card">
         <div class="recipe-mgmt-hdr">
           <div class="recipe-mgmt-title">Community Members</div>
-          <span style="font-size:12px;color:var(--muted)">Managed via Google Sheet</span>
+          <button class="add-recipe-btn" onclick="toggleMemberForm()">＋ Add Member</button>
         </div>
+
+        <!-- Search members -->
+        <div style="display:flex;align-items:center;gap:6px;background:#f3f4f6;border-radius:10px;padding:8px 12px;margin-bottom:12px">
+          <span style="font-size:13px">🔍</span>
+          <input id="member-search" style="border:none;outline:none;background:transparent;font-size:13px;font-family:DM Sans,sans-serif;width:100%" placeholder="Search by name or number..." oninput="renderAdminMembers()"/>
+        </div>
+
+        <!-- Add member form -->
+        <div class="add-form" id="member-form">
+          <div class="form-row">
+            <div class="form-grp"><label class="form-lbl">Full Name</label><input class="f-input" id="new-m-name" placeholder="e.g. Priya Sharma"/></div>
+            <div class="form-grp"><label class="form-lbl">Country</label>
+              <select class="f-select" id="new-m-country">
+                <option>India 🇮🇳</option><option>UAE 🇦🇪</option><option>UK 🇬🇧</option>
+                <option>USA 🇺🇸</option><option>Australia 🇦🇺</option><option>Singapore 🇸🇬</option>
+                <option>Malaysia 🇲🇾</option><option>Sri Lanka 🇱🇰</option><option>Other 🌍</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grp"><label class="form-lbl">WhatsApp Number (with country code)</label>
+            <input class="f-input" id="new-m-num" placeholder="e.g. +919876543210"/>
+          </div>
+          <div style="background:var(--amber-pale);border-radius:8px;padding:8px 12px;font-size:11px;color:#92400E;margin-bottom:10px">
+            ⚠️ Also add this number to your Google Sheet Column C to enable login verification.
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="pub-btn" style="flex:1" onclick="addMember()">✅ Add Member</button>
+            <button class="pub-btn" style="flex:0;background:#6b7280;padding:13px 16px" onclick="toggleMemberForm()">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Members count -->
+        <div id="member-count" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
+
+        <!-- Members list -->
         <div id="admin-members-list"></div>
-        <div style="margin-top:12px;padding:10px;background:var(--green-pale);border-radius:8px;font-size:12px;color:var(--green);text-align:center">
-          ✅ To add/remove members update your Google Sheet directly
-        </div>
       </div>
     </div>
 
