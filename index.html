@@ -152,7 +152,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .back-btn{background:rgba(255,255,255,0.2);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
 .detail-nav-title{font-family:'Playfair Display',serif;color:white;font-size:16px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .detail-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:30px}
-.detail-thumb{height:200px;display:flex;align-items:center;justify-content:center;font-size:72px;position:relative}
+.detail-thumb{display:none}
 .video-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.15);cursor:pointer;transition:background .2s}
 .video-overlay:hover{background:rgba(0,0,0,0.25)}
 .big-play{width:60px;height:60px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center}
@@ -166,7 +166,7 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 .info-card{background:var(--bg);border-radius:10px;padding:12px;text-align:center}
 .info-val{font-size:18px;font-weight:700;color:var(--green);font-family:'Playfair Display',serif}
 .info-key{font-size:11px;color:var(--muted);margin-top:2px}
-.watch-btn{width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:14px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:12px;display:flex;align-items:center;justify-content:center;gap:8px;transition:background .2s}
+.watch-btn{display:none}
 .watch-btn:hover{background:var(--green-dark)}
 .share-btn{width:100%;background:white;color:var(--green);border:1.5px solid var(--green);border-radius:12px;padding:13px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:20px;transition:all .2s}
 .share-btn:hover{background:var(--green-pale)}
@@ -331,6 +331,104 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 /* settings */
 .settings-card{background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
 .settings-card-title{font-size:14px;font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-container{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:0;overflow:hidden}
+.yt-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1a2e,#16213e);cursor:pointer;transition:all .2s}
+.yt-placeholder:hover .yt-play-btn{transform:scale(1.1)}
+.yt-thumb{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;opacity:0.6}
+.yt-play-btn{width:64px;height:64px;background:rgba(255,0,0,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;transition:transform .2s;box-shadow:0 4px 20px rgba(255,0,0,0.4)}
+.yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent white;margin-left:4px}
+.yt-title-overlay{position:absolute;bottom:0;left:0;right:0;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,0.8));color:white;font-size:13px;font-weight:500;z-index:2}
+.no-video-box{height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);gap:8px}
+.no-video-icon{font-size:40px}
+.no-video-txt{font-size:13px}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-player-wrap{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:0;overflow:hidden}
+.yt-player-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-thumb-wrap{position:relative;width:100%;padding-top:56.25%;cursor:pointer;overflow:hidden}
+.yt-thumb-wrap img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
+.yt-thumb-wrap .yt-play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;background:rgba(0,0,0,0.75);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.yt-thumb-wrap:hover .yt-play-btn{background:rgba(255,0,0,0.85)}
+.yt-thumb-wrap .yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent white;margin-left:4px}
+.yt-emoji-thumb{position:relative;width:100%;padding-top:56.25%;overflow:hidden}
+.yt-emoji-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:72px}
+.yt-no-video{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:white;font-size:13px;opacity:.7}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-container{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:0;overflow:hidden}
+.yt-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a1a1a;cursor:pointer;transition:background .2s}
+.yt-placeholder:hover{background:#222}
+.yt-thumb{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;opacity:0.7}
+.yt-play-btn{width:68px;height:48px;background:#FF0000;border-radius:12px;display:flex;align-items:center;justify-content:center;z-index:2;transition:transform .2s}
+.yt-placeholder:hover .yt-play-btn{transform:scale(1.1)}
+.yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:10px 0 10px 20px;border-color:transparent transparent transparent white;margin-left:4px}
+.yt-title-overlay{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;background:linear-gradient(transparent,rgba(0,0,0,0.8));color:white;font-size:12px;z-index:2}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-container{position:relative;width:100%;padding-top:56.25%;background:#000;overflow:hidden}
+.yt-frame{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-thumb{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;cursor:pointer;transition:opacity .3s}
+.yt-play-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,0.2);transition:background .2s}
+.yt-play-overlay:hover{background:rgba(0,0,0,0.35)}
+.yt-play-btn{width:64px;height:64px;background:#FF0000;border-radius:14px;display:flex;align-items:center;justify-content:center;transition:transform .2s;box-shadow:0 4px 16px rgba(0,0,0,0.4)}
+.yt-play-btn:hover{transform:scale(1.08)}
+.yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent white;margin-left:4px}
+.yt-loading{position:absolute;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.yt-loading-spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.yt-loading-txt{color:rgba(255,255,255,0.7);font-size:12px}
+.no-video{height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f3f4f6;gap:8px}
+.no-video-icon{font-size:40px}
+.no-video-txt{font-size:13px;color:var(--muted)}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-container{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:0;overflow:hidden;flex-shrink:0}
+.yt-iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1a2e,#16213e);cursor:pointer;transition:background .2s}
+.yt-placeholder:hover{background:linear-gradient(135deg,#16213e,#0f3460)}
+.yt-thumb{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0.4}
+.yt-play-btn{width:68px;height:68px;background:#FF0000;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1;box-shadow:0 4px 20px rgba(255,0,0,0.5);transition:transform .2s}
+.yt-placeholder:hover .yt-play-btn{transform:scale(1.1)}
+.yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent white;margin-left:5px}
+.yt-title-overlay{position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:linear-gradient(transparent,rgba(0,0,0,0.8));color:white;font-size:13px;font-weight:500;z-index:1}
+.no-video-placeholder{height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f3f4f6;color:var(--muted);gap:8px}
+.no-video-placeholder .nv-icon{font-size:40px}
+.no-video-placeholder p{font-size:13px}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-container{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:0;overflow:hidden}
+.yt-iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a1a2e;cursor:pointer;transition:background .2s}
+.yt-placeholder:hover{background:#16213e}
+.yt-thumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.6}
+.yt-play-btn{width:68px;height:48px;background:#ff0000;border-radius:12px;display:flex;align-items:center;justify-content:center;z-index:2;transition:transform .2s}
+.yt-placeholder:hover .yt-play-btn{transform:scale(1.1)}
+.yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:10px 0 10px 20px;border-color:transparent transparent transparent white;margin-left:4px}
+.yt-title-bar{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.8));padding:20px 14px 10px;z-index:2}
+.yt-title-txt{color:white;font-size:13px;font-weight:500}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-container{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:0;overflow:hidden;flex-shrink:0}
+.yt-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1a2e,#16213e);cursor:pointer;transition:all .2s}
+.yt-placeholder:hover{background:linear-gradient(135deg,#16213e,#0f3460)}
+.yt-thumb{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0.4}
+.yt-play-btn{width:68px;height:68px;background:#FF0000;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(255,0,0,0.4);transition:transform .2s;z-index:1}
+.yt-play-btn:hover{transform:scale(1.1)}
+.yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent white;margin-left:4px}
+.yt-title-overlay{position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:linear-gradient(transparent,rgba(0,0,0,0.8));color:white;font-size:13px;font-weight:500;z-index:1}
+.yt-badge{position:absolute;top:10px;right:10px;background:#FF0000;color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;z-index:1}
 
 </style>
 </head>
@@ -604,12 +702,12 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 // ── DATA ──
 // TO ADD A NEW RECIPE: copy one object below, change the values, save the file.
 const RECIPES = [
-  {id:1,title:"Oats & Berry Power Bowl",cat:"Breakfast",emoji:"🥣",url:"https://youtube.com/watch?v=example1",tags:["Low sugar","High fiber"],dur:"2:00",rating:4.9,notes:"Great for weight loss and sustained energy throughout the morning."},
-  {id:2,title:"Quinoa & Roasted Veggie Bowl",cat:"Lunch",emoji:"🥗",url:"https://youtube.com/watch?v=example2",tags:["Protein rich","Vegan"],dur:"1:55",rating:4.7,notes:""},
-  {id:3,title:"Lentil & Spinach Detox Soup",cat:"Soups",emoji:"🍲",url:"https://youtube.com/watch?v=example3",tags:["Detox","Iron rich"],dur:"2:00",rating:4.6,notes:"Best served warm. Add a squeeze of lemon for extra flavour."},
-  {id:4,title:"Turmeric Daal with Brown Rice",cat:"Dinner",emoji:"🍛",url:"https://youtube.com/watch?v=example4",tags:["Anti-inflam.","Gut health"],dur:"1:50",rating:4.8,notes:""},
-  {id:5,title:"Peanut Chikki Energy Balls",cat:"Snacks",emoji:"🥜",url:"https://youtube.com/watch?v=example5",tags:["No sugar","Energy"],dur:"1:45",rating:4.5,notes:"Perfect pre-workout snack."},
-  {id:6,title:"Sprouts & Pomegranate Salad",cat:"Salads",emoji:"🥦",url:"https://youtube.com/watch?v=example6",tags:["Raw","Vitamin C"],dur:"2:00",rating:4.9,notes:""},
+  {id:1,title:"Oats & Berry Power Bowl",cat:"Breakfast",emoji:"🥣",url:"https://www.youtube.com/watch?v=dQw4w9WgXcQ",tags:["Low sugar","High fiber"],dur:"2:00",rating:4.9,notes:"Great for weight loss and sustained energy throughout the morning."},
+  {id:2,title:"Quinoa & Roasted Veggie Bowl",cat:"Lunch",emoji:"🥗",url:"https://youtube.com/watch?v=9bZkp7q19f0",tags:["Protein rich","Vegan"],dur:"1:55",rating:4.7,notes:""},
+  {id:3,title:"Lentil & Spinach Detox Soup",cat:"Soups",emoji:"🍲",url:"https://youtube.com/watch?v=kffacxfA7G4",tags:["Detox","Iron rich"],dur:"2:00",rating:4.6,notes:"Best served warm. Add a squeeze of lemon for extra flavour."},
+  {id:4,title:"Turmeric Daal with Brown Rice",cat:"Dinner",emoji:"🍛",url:"https://youtube.com/watch?v=fJ9rUzIMcZQ",tags:["Anti-inflam.","Gut health"],dur:"1:50",rating:4.8,notes:""},
+  {id:5,title:"Peanut Chikki Energy Balls",cat:"Snacks",emoji:"🥜",url:"https://youtube.com/watch?v=60ItHLz5WEA",tags:["No sugar","Energy"],dur:"1:45",rating:4.5,notes:"Perfect pre-workout snack."},
+  {id:6,title:"Sprouts & Pomegranate Salad",cat:"Salads",emoji:"🥦",url:"https://youtube.com/watch?v=YVkUvmDQ3HY",tags:["Raw","Vitamin C"],dur:"2:00",rating:4.9,notes:""},
 ];
 const EMOJIS=['🥦','🥗','🍎','🥑','🫐','🍋','🥕','🌿','🍵','💪','❤️','🌟','✅','⚡','🔥','💧','🌱','🧘','🏃','💯','📌','⚠️','💡','🧠','🩺','🍽️','🥣','🍲','🍛','🥜','🫁','👏'];
 
@@ -777,14 +875,53 @@ function rateCard(e,id,val){
 }
 
 // ── DETAIL SCREEN ──
+function getYTId(url){
+  if(!url||url==='#') return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/,
+    /youtube\.com\/shorts\/([\w-]{11})/
+  ];
+  for(const p of patterns){
+    const m = url.match(p);
+    if(m) return m[1];
+  }
+  return null;
+}
+
+function buildVideoPlayer(r){
+  const ytId = getYTId(r.url);
+  if(!ytId) return `
+    <div class="no-video-box">
+      <div class="no-video-icon">🎬</div>
+      <div class="no-video-txt">No video added yet</div>
+      <div style="font-size:11px;color:var(--muted)">Admin can add a YouTube URL</div>
+    </div>`;
+  return `
+    <div class="yt-container" id="yt-wrap-${r.id}">
+      <div class="yt-placeholder" onclick="loadYTPlayer(${r.id},'${ytId}')">
+        <img class="yt-thumb" src="https://img.youtube.com/vi/${ytId}/maxresdefault.jpg" 
+             onerror="this.src='https://img.youtube.com/vi/${ytId}/0.jpg'"
+             alt="${r.title}"/>
+        <div class="yt-play-btn"></div>
+        <div class="yt-title-overlay">${r.title}</div>
+      </div>
+    </div>`;
+}
+
+function loadYTPlayer(id, ytId){
+  const wrap = document.getElementById('yt-wrap-'+id);
+  wrap.innerHTML = `<iframe 
+    src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&playsinline=1" 
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen>
+  </iframe>`;
+}
+
 function openDetail(id){
   const r=RECIPES.find(x=>x.id===id);
   document.getElementById('detail-nav-title').textContent=r.title;
   document.getElementById('detail-body').innerHTML=`
-    <div class="detail-thumb ${r.cat.toLowerCase()}">
-      ${r.emoji}
-      <div class="video-overlay" onclick="openVideo('${r.url}')"><div class="big-play"></div></div>
-    </div>
+    ${buildVideoPlayer(r)}
     <div class="detail-content">
       <div class="detail-cat">${r.cat}</div>
       <div class="detail-title">${r.title}</div>
@@ -793,7 +930,6 @@ function openDetail(id){
         <div class="info-card"><div class="info-val">${r.dur}</div><div class="info-key">Duration</div></div>
         <div class="info-card"><div class="info-val">${ratings[r.id]||r.rating}★</div><div class="info-key">Rating</div></div>
       </div>
-      <button class="watch-btn" onclick="openVideo('${r.url}')">▶ Watch Recipe Video</button>
       <button class="share-btn" onclick="shareRecipe('${r.title}')">↗ Share with Friends</button>
       <div class="rating-section">
         <div class="rating-title">Rate this recipe</div>
@@ -806,13 +942,18 @@ function openDetail(id){
     </div>`;
   document.getElementById('app-screen').classList.add('slide-left');
   document.getElementById('detail-screen').classList.remove('hidden');
+  // Render YouTube player after screen is shown
+  setTimeout(()=>renderYTPlayer(r.url, `yt-player-${r.id}`), 100);
 }
 function goToApp(){
+  // Stop video playing when navigating back
+  const iframe = document.querySelector('#detail-screen iframe');
+  if(iframe) iframe.src = iframe.src;
   document.getElementById('detail-screen').classList.add('hidden');
   document.getElementById('app-screen').classList.remove('slide-left');
   renderRecipes();
 }
-function openVideo(url){window.open(url,'_blank');}
+function openVideo(url){if(url&&url!=='#')window.open(url,'_blank');}
 function shareRecipe(title){
   if(navigator.share){navigator.share({title:'WellbeingHub Recipe',text:'Check out this healthy recipe: '+title,url:window.location.href});}
   else{navigator.clipboard&&navigator.clipboard.writeText(window.location.href);alert('Link copied!');}
@@ -1145,6 +1286,141 @@ function removeCategory(idx){
   renderCategories();
 }
 
+
+// ── YOUTUBE HELPER ──
+function getYouTubeId(url){
+  if(!url) return null;
+  const patterns = [
+    /youtube\.com\/watch\?v=([^&]+)/,
+    /youtu\.be\/([^?]+)/,
+    /youtube\.com\/embed\/([^?]+)/,
+    /youtube\.com\/shorts\/([^?]+)/
+  ];
+  for(const p of patterns){
+    const m = url.match(p);
+    if(m) return m[1];
+  }
+  return null;
+}
+
+
+// ── YOUTUBE HELPERS ──
+function getYTId(url){
+  if(!url||url==='#') return null;
+  const patterns = [
+    /youtube\.com\/watch\?v=([^&]+)/,
+    /youtu\.be\/([^?]+)/,
+    /youtube\.com\/embed\/([^?]+)/,
+    /youtube\.com\/shorts\/([^?]+)/
+  ];
+  for(const p of patterns){
+    const m = url.match(p);
+    if(m) return m[1];
+  }
+  // If they paste just the video ID directly
+  if(/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+  return null;
+}
+
+function loadYT(id, ytId){
+  const ph = document.getElementById(`yt-ph-${id}`);
+  const wrap = document.getElementById(`yt-wrap-${id}`);
+  if(!ph||!wrap) return;
+  const iframe = document.createElement('iframe');
+  iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`;
+  iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+  iframe.allowFullscreen = true;
+  ph.style.display = 'none';
+  wrap.appendChild(iframe);
+}
+
+
+// ── YOUTUBE PLAYER ──
+function getYTId(url){
+  if(!url || url==='#') return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/,
+    /^([\w-]{11})$/
+  ];
+  for(const p of patterns){
+    const m = url.match(p);
+    if(m) return m[1];
+  }
+  return null;
+}
+
+function renderYTPlayer(url, containerId){
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  const ytId = getYTId(url);
+  if(!ytId){
+    container.innerHTML = `
+      <div class="no-video">
+        <div class="no-video-icon">🎬</div>
+        <div class="no-video-txt">No video added yet</div>
+        <div style="font-size:11px;color:var(--muted)">Admin can add YouTube URL</div>
+      </div>`;
+    return;
+  }
+  const thumbUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+  container.innerHTML = `
+    <div class="yt-container" id="yt-wrap-${ytId}">
+      <img class="yt-thumb" src="${thumbUrl}" alt="Video thumbnail"
+        onerror="this.style.display='none'"
+        onload="document.getElementById('yt-overlay-${ytId}').style.display='flex'"/>
+      <div class="yt-play-overlay" id="yt-overlay-${ytId}" style="display:none" onclick="playYT('${ytId}')">
+        <div class="yt-play-btn"></div>
+      </div>
+    </div>`;
+  // Show overlay immediately as fallback
+  setTimeout(()=>{
+    const overlay = document.getElementById(`yt-overlay-${ytId}`);
+    if(overlay) overlay.style.display='flex';
+  }, 500);
+}
+
+function playYT(ytId){
+  const wrap = document.getElementById(`yt-wrap-${ytId}`);
+  if(!wrap) return;
+  wrap.innerHTML = `
+    <div class="yt-loading" id="yt-loading-${ytId}">
+      <div class="yt-loading-spinner"></div>
+      <div class="yt-loading-txt">Loading video...</div>
+    </div>
+    <iframe class="yt-frame" id="yt-iframe-${ytId}"
+      src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen
+      onload="document.getElementById('yt-loading-${ytId}').style.display='none'">
+    </iframe>`;
+}
+
+
+// ── YOUTUBE HELPERS ──
+function getYtId(url){
+  if(!url||url==='#') return null;
+  const patterns = [
+    /youtube\.com\/watch\?v=([^&]+)/,
+    /youtu\.be\/([^?]+)/,
+    /youtube\.com\/embed\/([^?]+)/,
+    /youtube\.com\/shorts\/([^?]+)/
+  ];
+  for(const p of patterns){
+    const m = url.match(p);
+    if(m) return m[1];
+  }
+  return null;
+}
+
+function loadYT(id, ytId){
+  const box = document.getElementById('yt-box-'+id);
+  if(!box) return;
+  box.innerHTML = `<iframe class="yt-iframe"
+    src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen></iframe>`;
+}
+
 </script>
 
 <!-- ══════════════ ADMIN SCREEN ══════════════ -->
@@ -1238,6 +1514,12 @@ function removeCategory(idx){
 
         <!-- Add Recipe Form -->
         <div class="add-form" id="add-form">
+          <div style="background:#EFF6FF;border-radius:10px;padding:12px;margin-bottom:12px;font-size:12px;color:#1D4ED8;line-height:1.8">
+            <strong>📹 How to add a video:</strong><br/>
+            1. Record on phone OR desktop 📱💻<br/>
+            2. Upload to <a href="https://youtube.com" target="_blank" style="color:#1D4ED8;font-weight:600">youtube.com</a> → set <strong>Unlisted</strong> 🔒<br/>
+            3. Copy the video URL and paste below ⬇️
+          </div>
           <div class="form-grp"><label class="form-lbl">Recipe Title</label><input class="f-input" id="new-title" placeholder="e.g. Turmeric Oats Porridge"/></div>
           <div class="form-row">
             <div class="form-grp"><label class="form-lbl">Category</label>
@@ -1248,7 +1530,10 @@ function removeCategory(idx){
             </div>
             <div class="form-grp"><label class="form-lbl">Duration</label><input class="f-input" id="new-dur" placeholder="2:00"/></div>
           </div>
-          <div class="form-grp"><label class="form-lbl">YouTube URL</label><input class="f-input" id="new-url" placeholder="https://youtube.com/watch?v=..."/></div>
+          <div class="form-grp"><label class="form-lbl">YouTube URL</label><input class="f-input" id="new-url" placeholder="https://youtube.com/watch?v=... or just the video ID"/>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">
+            💡 Upload video to YouTube as <strong>Unlisted</strong> → copy link → paste here. Works from phone & desktop!
+          </div></div>
           <div class="form-grp"><label class="form-lbl">Nutrition Tags</label><input class="f-input" id="new-tags" placeholder="High fiber, Low sugar"/></div>
           <div class="form-grp"><label class="form-lbl">Notes</label><input class="f-input" id="new-notes" placeholder="Optional tip for members"/></div>
           <div style="display:flex;gap:8px">
