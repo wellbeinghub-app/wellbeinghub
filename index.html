@@ -808,7 +808,7 @@ function showStep(id){
 function enterApp(){
   document.getElementById('otp-screen').classList.add('slide-left');
   document.getElementById('app-screen').classList.remove('hidden');
-  renderRecipes();
+  loadRecipes();
 }
 
 // ── RECIPE RENDER ──
@@ -825,7 +825,7 @@ function renderRecipes(){
   const el = document.getElementById('recipe-list');
   document.getElementById('list-count').textContent = list.length+' video'+(list.length!==1?'s':'');
   document.getElementById('list-label').textContent = currentFilter==='All'?'All recipes':'Category: '+currentFilter;
-  document.getElementById('total-count').textContent = RECIPES.length;
+  if(document.getElementById('total-count')) document.getElementById('total-count').textContent = RECIPES.length;
   if(!list.length){
     el.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div><p>No recipes found.<br>Try a different search or filter.</p></div>';
     return;
@@ -1052,7 +1052,7 @@ function exitAdmin(){
   } else {
     // Came from app screen
     document.getElementById('app-screen').classList.remove('slide-left');
-    renderRecipes();
+    loadRecipes();
   }
 }
 
