@@ -700,15 +700,8 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 
 <script>
 // ── DATA ──
-// TO ADD A NEW RECIPE: copy one object below, change the values, save the file.
-const RECIPES = [
-  {id:1,title:"Oats & Berry Power Bowl",cat:"Breakfast",emoji:"🥣",url:"https://www.youtube.com/watch?v=dQw4w9WgXcQ",tags:["Low sugar","High fiber"],dur:"2:00",rating:4.9,notes:"Great for weight loss and sustained energy throughout the morning."},
-  {id:2,title:"Quinoa & Roasted Veggie Bowl",cat:"Lunch",emoji:"🥗",url:"https://youtube.com/watch?v=9bZkp7q19f0",tags:["Protein rich","Vegan"],dur:"1:55",rating:4.7,notes:""},
-  {id:3,title:"Lentil & Spinach Detox Soup",cat:"Soups",emoji:"🍲",url:"https://youtube.com/watch?v=kffacxfA7G4",tags:["Detox","Iron rich"],dur:"2:00",rating:4.6,notes:"Best served warm. Add a squeeze of lemon for extra flavour."},
-  {id:4,title:"Turmeric Daal with Brown Rice",cat:"Dinner",emoji:"🍛",url:"https://youtube.com/watch?v=fJ9rUzIMcZQ",tags:["Anti-inflam.","Gut health"],dur:"1:50",rating:4.8,notes:""},
-  {id:5,title:"Peanut Chikki Energy Balls",cat:"Snacks",emoji:"🥜",url:"https://youtube.com/watch?v=60ItHLz5WEA",tags:["No sugar","Energy"],dur:"1:45",rating:4.5,notes:"Perfect pre-workout snack."},
-  {id:6,title:"Sprouts & Pomegranate Salad",cat:"Salads",emoji:"🥦",url:"https://youtube.com/watch?v=YVkUvmDQ3HY",tags:["Raw","Vitamin C"],dur:"2:00",rating:4.9,notes:""},
-];
+// Recipes are loaded live from Google Sheet — do not hardcode here
+let RECIPES = [];
 const EMOJIS=['🥦','🥗','🍎','🥑','🫐','🍋','🥕','🌿','🍵','💪','❤️','🌟','✅','⚡','🔥','💧','🌱','🧘','🏃','💯','📌','⚠️','💡','🧠','🩺','🍽️','🥣','🍲','🍛','🥜','🫁','👏'];
 
 let adminPassword = localStorage.getItem('wbh_pwd') || 'WBH@2026';
