@@ -702,6 +702,81 @@ body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);dis
 // ── DATA ──
 // Recipes are loaded live from Google Sheet — do not hardcode here
 let RECIPES = [];
+
+// ── LOAD RECIPES FROM GOOGLE SHEET ──
+const SHEET_ID = '1PH3ewef8ti1NN-qLg5YznUAsMpEwj5EJqUBtSUTeW5k';
+const CAT_EMOJIS = {Breakfast:'🥣',Lunch:'🥗',Dinner:'🍛',Soups:'🍲',Salads:'🥦',Snacks:'🥜'};
+
+async function loadRecipes(){
+  showRecipesLoading();
+  try {
+    const tabs = ['Recipes','📹 Recipes','recipes','Sheet2','Sheet1'];
+    let rows = null;
+    for(const tab of tabs){
+      try {
+        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tab)}`;
+        const res = await fetch(url);
+        const text = await res.text();
+        const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*?)\);/s)[1]);
+        if(json.table && json.table.rows && json.table.rows.length > 1){
+          rows = json.table.rows;
+          console.log('Found recipes in tab:', tab);
+          break;
+        }
+      } catch(e){ console.log('Tab not found:', tab); continue; }
+    }
+    if(!rows || rows.length < 2) throw new Error('No recipe data found in sheet. Check tab name is Recipes and has data.');
+
+    RECIPES = rows.slice(1)
+      .filter(r => r.c && r.c[1]?.v)
+      .map((r, i) => ({
+        id: i + 1,
+        title: r.c[1]?.v?.toString().trim() || '',
+        cat: r.c[2]?.v?.toString().trim() || 'Breakfast',
+        url: r.c[3]?.v?.toString().trim() || '',
+        tags: (r.c[5]?.v?.toString() || '').split(',').map(t => t.trim()).filter(Boolean),
+        dur: r.c[6]?.v?.toString().trim() || '2:00',
+        rating: 4.5,
+        notes: r.c[10]?.v?.toString().trim() || '',
+        emoji: CAT_EMOJIS[r.c[2]?.v?.toString().trim()] || '🍽️',
+        active: r.c[9]?.v?.toString().toUpperCase().trim() === 'YES'
+      }))
+      .filter(r => r.active && r.title);
+
+    console.log('Loaded recipes:', RECIPES.length);
+
+    if(!RECIPES.length) throw new Error('No active recipes found. Make sure Column J says YES for your recipes.');
+    
+    renderRecipes();
+    if(document.getElementById('total-count')) 
+      document.getElementById('total-count').textContent = RECIPES.length;
+
+  } catch(e) {
+    console.error('Recipe load error:', e);
+    showRecipesError(e.message);
+  }
+}
+
+function showRecipesLoading(){
+  const el = document.getElementById('recipe-list');
+  if(el) el.innerHTML = `
+    <div style="text-align:center;padding:40px 20px;color:var(--muted)">
+      <div style="font-size:36px;margin-bottom:10px">⏳</div>
+      <div style="font-size:13px">Loading recipes from Google Sheet...</div>
+    </div>`;
+}
+
+function showRecipesError(msg){
+  const el = document.getElementById('recipe-list');
+  if(el) el.innerHTML = `
+    <div style="text-align:center;padding:40px 20px">
+      <div style="font-size:36px;margin-bottom:10px">⚠️</div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:6px;font-weight:500">Could not load recipes</div>
+      <div style="font-size:11px;color:#dc2626;margin-bottom:14px;line-height:1.6">${msg}</div>
+      <button onclick="loadRecipes()" style="background:var(--green);color:white;border:none;border-radius:8px;padding:10px 20px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">🔄 Try Again</button>
+    </div>`;
+}
+
 const EMOJIS=['🥦','🥗','🍎','🥑','🫐','🍋','🥕','🌿','🍵','💪','❤️','🌟','✅','⚡','🔥','💧','🌱','🧘','🏃','💯','📌','⚠️','💡','🧠','🩺','🍽️','🥣','🍲','🍛','🥜','🫁','👏'];
 
 let adminPassword = localStorage.getItem('wbh_pwd') || 'WBH@2026';
