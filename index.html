@@ -909,6 +909,21 @@ function showStep(id){
   document.querySelectorAll('.otp-step').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
+function debugSheet(){
+  const SHEET_ID = '1PH3ewef8ti1NN-qLg5YznUAsMpEwj5EJqUBtSUTeW5k';
+  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Recipes`;
+  fetch(url).then(r=>r.text()).then(text=>{
+    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*?)\);/s)[1]);
+    const rows = json.table.rows;
+    console.log('TOTAL ROWS:', rows.length);
+    rows.slice(0,5).forEach((r,i)=>{
+      const cols = r.c ? r.c.map((c,ci)=>`[${ci}]=${JSON.stringify(c?.v)}`) : [];
+      console.log('ROW '+i+':', cols.join(' | '));
+    });
+  });
+}
+window.debugSheet = debugSheet;
+
 function enterApp(){
   document.getElementById('otp-screen').classList.add('slide-left');
   document.getElementById('app-screen').classList.remove('hidden');
