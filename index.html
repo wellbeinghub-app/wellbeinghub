@@ -1,1 +1,1797 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0"/>
+<meta name="theme-color" content="#2D6A4F"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"/>
+<title>WellbeingHub</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;1,400&display=swap" rel="stylesheet"/>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+:root{
+  --green:#2D6A4F;--green2:#52B788;--green-pale:#D8F3DC;--green-dark:#1B4332;
+  --orange:#E76F51;--amber:#F59E0B;--amber-pale:#FEF3C7;
+  --brown:#3D2B1F;--cream:#FEFAE0;
+  --text:#1a1a1a;--muted:#6b7280;--border:#e5e7eb;
+  --bg:#f7f4ef;--card:#ffffff;--radius:14px;
+}
+html,body{height:100%;overflow:hidden}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);display:flex;flex-direction:column;max-width:100%;margin:0 auto;position:relative}
 
+/* ── SCREENS ── */
+.screen{position:absolute;inset:0;display:flex;flex-direction:column;background:var(--bg);transition:transform .35s cubic-bezier(.4,0,.2,1),opacity .35s;overflow:hidden}
+.screen.hidden{transform:translateX(100%);opacity:0;pointer-events:none}
+.screen.slide-left{transform:translateX(-100%);opacity:0;pointer-events:none}
+
+/* ── OTP SCREEN ── */
+#otp-screen{justify-content:center;align-items:center;padding:32px 24px;background:linear-gradient(160deg,#f7f4ef 60%,#d8f3dc);min-height:100vh;width:100%}
+.otp-logo{font-family:'Playfair Display',serif;font-size:32px;color:var(--green);text-align:center;margin-bottom:4px}
+.otp-logo span{color:var(--green2)}
+.otp-sub{font-size:13px;color:var(--muted);text-align:center;margin-bottom:36px}
+.otp-card{background:white;border-radius:24px;padding:28px 24px;width:100%;max-width:400px;box-shadow:0 8px 32px rgba(0,0,0,0.08)}
+.otp-step{display:none}.otp-step.active{display:block}
+.session-pill{display:inline-flex;align-items:center;gap:5px;background:var(--green-pale);color:var(--green);font-size:11px;font-weight:500;padding:4px 12px;border-radius:100px;margin-bottom:16px}
+.otp-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;margin-bottom:6px}
+.otp-desc{font-size:13px;color:var(--muted);line-height:1.6;margin-bottom:20px}
+.otp-desc strong{color:var(--text)}
+.phone-row{display:flex;gap:8px;margin-bottom:14px}
+.cc-input{width:90px;padding:13px 4px;border:1.5px solid var(--border);border-radius:12px;font-size:12px;font-family:'DM Sans',sans-serif;text-align:center;outline:none;transition:border-color .18s;cursor:pointer;background:white}
+.ph-input{flex:1;padding:13px 14px;border:1.5px solid var(--border);border-radius:12px;font-size:15px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .18s}
+.cc-input:focus,.ph-input:focus{border-color:var(--green2)}
+.otp-btn{width:100%;max-width:400px;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;margin-bottom:10px}
+.otp-btn.wa{background:#25D366;color:white}.otp-btn.wa:hover{background:#1aab56}
+.otp-btn.primary{background:var(--green);color:white}.otp-btn.primary:hover{background:var(--green-dark)}
+.otp-note{font-size:11px;color:var(--muted);text-align:center;line-height:1.6}
+.otp-btn:disabled{opacity:.6;cursor:not-allowed}
+.otp-boxes{display:flex;gap:10px;justify-content:center;margin-bottom:18px}
+.otp-box{width:52px;height:58px;border:2px solid var(--border);border-radius:14px;font-size:24px;font-weight:700;text-align:center;outline:none;font-family:'DM Sans',sans-serif;transition:border-color .18s}
+.otp-box:focus{border-color:var(--green2)}
+.resend-txt{font-size:12px;color:var(--muted);text-align:center;margin-bottom:14px}
+.resend-txt span{color:var(--green);cursor:pointer;font-weight:500}
+.back-link{font-size:12px;color:var(--muted);text-align:center;cursor:pointer;margin-top:6px}
+.back-link:hover{color:var(--green)}
+.success-wrap{text-align:center;padding:8px 0;display:flex;flex-direction:column;align-items:center}
+.success-emoji{font-size:56px;margin-bottom:14px}
+
+/* ── MAIN APP ── */
+#app-screen{display:flex;flex-direction:column}
+.app-nav{background:var(--green);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 20px;flex-shrink:0;position:relative;z-index:10}
+.app-logo{font-family:'Playfair Display',serif;color:white;font-size:19px}
+.app-logo span{color:var(--green2)}
+.admin-trigger{background:rgba(255,255,255,0.15);border:1px solid rgba(255,255,255,0.25);color:white;border-radius:8px;padding:6px 14px;font-size:12px;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .2s}
+.admin-trigger:hover{background:rgba(255,255,255,0.25)}
+
+.app-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:70px}
+
+/* hero */
+.hero{background:linear-gradient(135deg,var(--green),var(--green-dark));padding:32px 32px 28px;color:white;position:relative;overflow:hidden;flex-shrink:0}
+.hero::before{content:'';position:absolute;right:-20px;top:-20px;width:160px;height:160px;border-radius:50%;background:rgba(82,183,136,0.15)}
+.hero h1{font-family:'Playfair Display',serif;font-size:22px;line-height:1.3;margin-bottom:5px}
+.hero p{font-size:12px;opacity:.75;font-weight:300}
+.hero-stats{display:flex;gap:24px;margin-top:16px}
+.stat-num{font-size:20px;font-weight:700;color:var(--green2)}
+.stat-lbl{font-size:10px;opacity:.7;margin-top:1px}
+
+/* wa tip */
+.wa-tip{margin:14px 16px 0;background:white;border-left:4px solid #25D366;border-radius:10px;padding:11px 14px;display:flex;align-items:center;gap:10px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.wa-tip-icon{width:32px;height:32px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0}
+.wa-tip-text strong{font-size:12px;font-weight:500;display:block}
+.wa-tip-text span{font-size:11px;color:var(--muted)}
+
+/* filters */
+.filters-wrap{padding:14px 24px 0}
+.sec-label{font-size:11px;font-weight:500;color:var(--muted);text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px}
+.chips{display:flex;gap:7px;flex-wrap:wrap;padding-bottom:4px}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex-shrink:0;padding:7px 14px;border-radius:100px;border:1.5px solid var(--border);background:white;font-size:12px;cursor:pointer;font-family:'DM Sans',sans-serif;color:var(--muted);transition:all .18s;white-space:nowrap}
+.chip:hover{border-color:var(--green2);color:var(--green)}
+.chip.active{background:var(--green);border-color:var(--green);color:white;font-weight:500}
+
+/* search */
+.search-wrap{padding:12px 24px 0}
+.search-box{display:flex;align-items:center;gap:8px;background:white;border:1.5px solid var(--border);border-radius:12px;padding:10px 14px;transition:border-color .18s}
+.search-box:focus-within{border-color:var(--green2)}
+.search-icon{color:var(--muted);font-size:14px;flex-shrink:0}
+.search-input{border:none;outline:none;font-size:14px;font-family:'DM Sans',sans-serif;width:100%;background:transparent;color:var(--text)}
+.search-input::placeholder{color:var(--muted)}
+
+/* recipe list */
+.recipes-wrap{padding:14px 24px 0}
+.list-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:10px}
+.list-header .sec-label{margin:0}
+.count-lbl{font-size:11px;color:var(--muted)}
+.recipe-list{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+
+/* recipe card */
+.recipe-card{background:white;border-radius:var(--radius);overflow:hidden;display:flex;box-shadow:0 2px 8px rgba(0,0,0,0.06);cursor:pointer;transition:transform .2s,box-shadow .2s;animation:fadeUp .4s ease both}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:translateY(0)}}
+.recipe-card:hover{transform:translateY(-2px);box-shadow:0 6px 20px rgba(0,0,0,0.1)}
+.card-thumb{width:96px;min-height:96px;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:34px;position:relative}
+.card-thumb.breakfast{background:linear-gradient(135deg,#FEF3C7,#FDE68A)}
+.card-thumb.lunch{background:linear-gradient(135deg,#D1FAE5,#A7F3D0)}
+.card-thumb.dinner{background:linear-gradient(135deg,#E0E7FF,#C7D2FE)}
+.card-thumb.soups{background:linear-gradient(135deg,#FCE7F3,#FBCFE8)}
+.card-thumb.salads{background:linear-gradient(135deg,#ECFDF5,#A7F3D0)}
+.card-thumb.snacks{background:linear-gradient(135deg,#FEF3C7,#FED7AA)}
+.dur-badge{position:absolute;top:6px;left:6px;background:rgba(0,0,0,0.5);color:white;font-size:9px;padding:2px 6px;border-radius:100px;font-weight:500}
+.play-circle{position:absolute;bottom:7px;right:7px;width:26px;height:26px;background:rgba(0,0,0,0.55);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.play-circle::after{content:'';width:0;height:0;border-style:solid;border-width:4px 0 4px 7px;border-color:transparent transparent transparent white;margin-left:2px}
+.card-body{padding:11px 12px;flex:1;display:flex;flex-direction:column;justify-content:space-between}
+.card-cat{font-size:10px;font-weight:500;letter-spacing:.5px;text-transform:uppercase;color:var(--green);margin-bottom:2px}
+.card-title{font-family:'Playfair Display',serif;font-size:13px;font-weight:700;color:var(--brown);line-height:1.3;margin-bottom:6px}
+.card-footer{display:flex;align-items:center;justify-content:space-between}
+.card-tags{display:flex;gap:4px;flex-wrap:wrap}
+.tag{font-size:9px;background:var(--green-pale);color:var(--green);padding:2px 7px;border-radius:100px;font-weight:500}
+.card-rating{display:flex;align-items:center;gap:3px;font-size:11px;font-weight:500;color:var(--brown)}
+.stars{color:var(--amber);font-size:10px;letter-spacing:-1px}
+.rate-row{display:flex;align-items:center;gap:5px;margin-top:7px;padding-top:7px;border-top:1px solid var(--border)}
+.rate-lbl{font-size:10px;color:var(--muted);flex:1}
+.star-btns{display:flex;gap:1px}
+.sbtn{font-size:16px;background:none;border:none;cursor:pointer;opacity:.25;transition:opacity .15s,transform .15s;padding:0;line-height:1}
+.sbtn.lit{opacity:1}
+.sbtn:hover{transform:scale(1.2)}
+
+/* empty state */
+.empty-state{text-align:center;padding:40px 20px;color:var(--muted)}
+.empty-state .empty-icon{font-size:40px;margin-bottom:10px}
+.empty-state p{font-size:13px}
+
+/* bottom nav */
+.bottom-nav{position:fixed;bottom:0;left:0;width:100%;background:white;border-top:1px solid var(--border);display:flex;z-index:20}
+.nav-btn{flex:1;padding:10px 0 8px;display:flex;flex-direction:column;align-items:center;gap:3px;border:none;background:none;cursor:pointer;font-family:'DM Sans',sans-serif}
+.nav-icon{font-size:18px}
+.nav-lbl{font-size:10px;color:var(--muted)}
+.nav-btn.active .nav-lbl{color:var(--green);font-weight:500}
+
+/* ── DETAIL SCREEN ── */
+#detail-screen{background:white}
+.detail-nav{background:var(--green);height:56px;display:flex;align-items:center;padding:0 16px;gap:12px;flex-shrink:0}
+.back-btn{background:rgba(255,255,255,0.2);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.detail-nav-title{font-family:'Playfair Display',serif;color:white;font-size:16px;flex:1;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.detail-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding-bottom:30px}
+.detail-thumb{display:none}
+.video-overlay{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;background:rgba(0,0,0,0.15);cursor:pointer;transition:background .2s}
+.video-overlay:hover{background:rgba(0,0,0,0.25)}
+.big-play{width:60px;height:60px;background:rgba(0,0,0,0.6);border-radius:50%;display:flex;align-items:center;justify-content:center}
+.big-play::after{content:'';width:0;height:0;border-style:solid;border-width:10px 0 10px 18px;border-color:transparent transparent transparent white;margin-left:4px}
+.detail-content{padding:18px 16px}
+.detail-cat{font-size:11px;font-weight:500;text-transform:uppercase;letter-spacing:.5px;color:var(--green);margin-bottom:4px}
+.detail-title{font-family:'Playfair Display',serif;font-size:22px;font-weight:700;color:var(--brown);margin-bottom:12px;line-height:1.3}
+.detail-tags{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:16px}
+.detail-tag{font-size:11px;background:var(--green-pale);color:var(--green);padding:4px 12px;border-radius:100px;font-weight:500}
+.info-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:18px}
+.info-card{background:var(--bg);border-radius:10px;padding:12px;text-align:center}
+.info-val{font-size:18px;font-weight:700;color:var(--green);font-family:'Playfair Display',serif}
+.info-key{font-size:11px;color:var(--muted);margin-top:2px}
+.watch-btn{display:none}
+.watch-btn:hover{background:var(--green-dark)}
+.share-btn{width:100%;background:white;color:var(--green);border:1.5px solid var(--green);border-radius:12px;padding:13px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;margin-bottom:20px;transition:all .2s}
+.share-btn:hover{background:var(--green-pale)}
+.rating-section{background:var(--bg);border-radius:14px;padding:16px}
+.rating-title{font-size:14px;font-weight:500;margin-bottom:12px}
+.big-stars{display:flex;gap:8px;justify-content:center;margin-bottom:10px}
+.big-star{font-size:32px;cursor:pointer;opacity:.25;transition:opacity .15s,transform .2s}
+.big-star.lit{opacity:1}
+.big-star:hover{transform:scale(1.15)}
+.rating-note{font-size:12px;color:var(--muted);text-align:center}
+.notes-section{margin-top:16px;padding:14px;background:#fffbf0;border-radius:12px;border-left:3px solid var(--amber)}
+.notes-title{font-size:11px;font-weight:500;color:var(--amber);text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px}
+.notes-text{font-size:13px;color:var(--brown);line-height:1.6}
+
+/* ── ADMIN PANEL ── */
+.panel-overlay{position:fixed;inset:0;background:rgba(0,0,0,0.5);z-index:100;display:none;align-items:flex-end;}
+.panel-overlay.open{display:flex}
+.panel{background:white;border-radius:20px 20px 0 0;padding:20px 20px 32px;width:100%;max-width:680px;margin:0 auto;max-height:88vh;overflow-y:auto;animation:slideUp .3s ease}
+@keyframes slideUp{from{transform:translateY(50px);opacity:0}to{transform:translateY(0);opacity:1}}
+.panel-hdr{display:flex;justify-content:space-between;align-items:center;margin-bottom:14px}
+.panel-title{font-family:'Playfair Display',serif;font-size:20px;font-weight:700}
+.close-btn{width:32px;height:32px;border-radius:50%;background:#f3f4f6;border:none;cursor:pointer;font-size:16px;display:flex;align-items:center;justify-content:center}
+.p-tabs{display:flex;gap:4px;background:#f3f4f6;border-radius:10px;padding:4px;margin-bottom:16px}
+.p-tab{flex:1;text-align:center;padding:8px;border-radius:7px;font-size:13px;cursor:pointer;border:none;background:none;font-family:'DM Sans',sans-serif;color:var(--muted);transition:all .18s}
+.p-tab.active{background:white;color:var(--green);font-weight:500;box-shadow:0 1px 3px rgba(0,0,0,0.08)}
+.form-lbl{font-size:12px;font-weight:500;color:var(--muted);margin-bottom:5px;display:block}
+.form-grp{margin-bottom:12px}
+.f-input,.f-select,.f-textarea{width:100%;padding:11px 13px;border:1.5px solid var(--border);border-radius:10px;font-size:14px;font-family:'DM Sans',sans-serif;outline:none;transition:border-color .18s;background:white}
+.f-input:focus,.f-select:focus,.f-textarea:focus{border-color:var(--green2)}
+.upload-zone{border:2px dashed var(--border);border-radius:12px;padding:20px;text-align:center;color:var(--muted);font-size:13px;cursor:pointer;transition:all .18s}
+.upload-zone:hover{border-color:var(--green2);background:var(--green-pale)}
+.pub-btn{width:100%;background:var(--green);color:white;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;margin-top:4px;transition:background .2s}
+.pub-btn:hover{background:var(--green-dark)}
+
+/* broadcast */
+.bc-box{background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:14px;padding:16px}
+.bc-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.bc-icon{width:34px;height:34px;background:#25D366;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px;flex-shrink:0}
+.bc-hdr-txt strong{font-size:13px;color:#166534;display:block}
+.bc-hdr-txt span{font-size:11px;color:#4ade80}
+.media-row{display:flex;gap:7px;margin-bottom:10px}
+.media-btn{flex:1;background:white;border:1.5px solid #bbf7d0;border-radius:10px;padding:9px 6px;display:flex;flex-direction:column;align-items:center;gap:3px;cursor:pointer;transition:all .18s;font-family:'DM Sans',sans-serif}
+.media-btn:hover{background:var(--green-pale);border-color:var(--green2)}
+.media-btn-icon{font-size:20px}
+.media-btn-lbl{font-size:10px;color:var(--muted);font-weight:500}
+.media-preview{display:none;background:white;border:1.5px solid #bbf7d0;border-radius:10px;padding:10px 12px;margin-bottom:10px;align-items:center;gap:10px}
+.media-preview.show{display:flex}
+.prev-thumb{width:40px;height:40px;border-radius:8px;background:#e5e7eb;display:flex;align-items:center;justify-content:center;font-size:18px;flex-shrink:0}
+.prev-info{flex:1}
+.prev-name{font-size:12px;font-weight:500}
+.prev-size{font-size:10px;color:var(--muted)}
+.prev-rm{background:none;border:none;font-size:16px;cursor:pointer;color:var(--muted);padding:4px}
+.emoji-picker{display:none;background:white;border:1.5px solid #bbf7d0;border-radius:12px;padding:10px;margin-bottom:10px}
+.emoji-picker.show{display:block}
+.ep-title{font-size:10px;color:var(--muted);font-weight:500;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.ep-grid{display:flex;flex-wrap:wrap;gap:3px}
+.ep-item{font-size:20px;cursor:pointer;padding:4px;border-radius:6px;line-height:1;transition:background .15s}
+.ep-item:hover{background:#f3f4f6}
+.msg-wrap{background:white;border:1.5px solid #bbf7d0;border-radius:12px;overflow:hidden;margin-bottom:10px}
+.msg-toolbar{display:flex;align-items:center;gap:3px;padding:7px 10px;border-bottom:1px solid var(--border);flex-wrap:wrap}
+.tb-btn{background:none;border:none;cursor:pointer;padding:4px 6px;border-radius:6px;font-size:12px;font-family:'DM Sans',sans-serif;transition:background .15s;color:var(--text)}
+.tb-btn:hover{background:#f3f4f6}
+.tb-divider{width:1px;height:18px;background:var(--border);margin:0 2px}
+.msg-editor{width:100%;min-height:80px;padding:11px;border:none;outline:none;font-size:14px;font-family:'DM Sans',sans-serif;resize:none;color:var(--text)}
+.msg-footer{display:flex;justify-content:space-between;align-items:center;padding:7px 10px;border-top:1px solid var(--border)}
+.char-cnt{font-size:10px;color:var(--muted)}
+.sched-row{display:flex;align-items:center;gap:8px;margin-bottom:10px}
+.tog-track{position:relative;width:34px;height:18px;flex-shrink:0}
+.tog-track input{opacity:0;width:0;height:0;position:absolute}
+.tog-slider{position:absolute;cursor:pointer;inset:0;background:#d1d5db;border-radius:20px;transition:.2s}
+.tog-slider:before{content:'';position:absolute;height:12px;width:12px;left:3px;bottom:3px;background:white;border-radius:50%;transition:.2s}
+.tog-track input:checked+.tog-slider{background:var(--green)}
+.tog-track input:checked+.tog-slider:before{transform:translateX(16px)}
+.sched-lbl{font-size:13px;flex:1}
+.sched-input{padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;font-size:12px;font-family:'DM Sans',sans-serif;outline:none;flex:1;display:none}
+.wa-send{width:100%;background:#25D366;color:white;border:none;border-radius:12px;padding:13px;font-size:15px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:background .2s;display:flex;align-items:center;justify-content:center;gap:8px}
+.wa-send:hover{background:#1aab56}
+.wa-note{font-size:10px;color:#4ade80;text-align:center;margin-top:7px}
+.coming-soon{background:var(--amber-pale);border:1.5px solid var(--amber);border-radius:10px;padding:10px 14px;font-size:12px;color:#92400E;margin-bottom:12px;display:flex;align-items:center;gap:7px}
+
+@media(min-width:768px){
+  .otp-screen{padding:40px}
+  .hero h1{font-size:32px}
+  .hero{padding:40px 40px 32px}
+  .filters-wrap,.search-wrap,.recipes-wrap{padding-left:40px;padding-right:40px}
+  .app-nav{padding:0 40px}
+  .detail-content{padding:24px 32px}
+  .wa-tip{margin:18px 40px 0}
+  .bottom-nav{padding:0 40px}
+  .hero-stats{gap:40px}
+  .stat-num{font-size:28px}
+}
+@media(min-width:1024px){
+  .recipe-list{grid-template-columns:repeat(auto-fill,minmax(340px,1fr))}
+  .filters-wrap,.search-wrap,.recipes-wrap{padding-left:60px;padding-right:60px}
+  .app-nav{padding:0 60px}
+  .wa-tip{margin:20px 60px 0}
+  .hero{padding:48px 60px 40px}
+}
+
+/* ── ADMIN SCREEN ── */
+#admin-screen{background:#f7f4ef}
+.admin-nav{background:var(--green-dark);height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 24px;flex-shrink:0}
+.admin-nav-left{display:flex;align-items:center;gap:12px}
+.admin-back{background:rgba(255,255,255,0.15);border:none;color:white;width:36px;height:36px;border-radius:50%;cursor:pointer;font-size:18px;display:flex;align-items:center;justify-content:center}
+.admin-nav-title{font-family:'Playfair Display',serif;color:white;font-size:18px}
+.admin-badge{background:var(--amber);color:var(--brown);font-size:10px;font-weight:700;padding:3px 8px;border-radius:100px}
+.admin-body{flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:20px 24px 40px}
+
+/* admin stats row */
+.admin-stats{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:20px}
+.admin-stat-card{background:white;border-radius:12px;padding:14px;text-align:center;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.admin-stat-num{font-size:22px;font-weight:700;font-family:'Playfair Display',serif;color:var(--green)}
+.admin-stat-lbl{font-size:10px;color:var(--muted);margin-top:2px}
+
+/* admin tabs */
+.admin-tabs{display:flex;gap:4px;background:white;border-radius:12px;padding:4px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.admin-tab{flex:1;text-align:center;padding:10px 4px;border-radius:9px;font-size:12px;cursor:pointer;border:none;background:none;font-family:'DM Sans',sans-serif;color:var(--muted);transition:all .18s;display:flex;flex-direction:column;align-items:center;gap:3px}
+.admin-tab-icon{font-size:18px}
+.admin-tab.active{background:var(--green);color:white;font-weight:500}
+.admin-tab-content{display:none}
+.admin-tab-content.active{display:block}
+
+/* recipe management */
+.recipe-mgmt-card{background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.recipe-mgmt-hdr{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.recipe-mgmt-title{font-size:15px;font-weight:500;font-family:'Playfair Display',serif}
+.add-recipe-btn{background:var(--green);color:white;border:none;border-radius:8px;padding:7px 14px;font-size:12px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;display:flex;align-items:center;gap:5px}
+
+.recipe-row{display:flex;align-items:center;gap:10px;padding:10px 0;border-bottom:1px solid var(--border)}
+.recipe-row:last-child{border-bottom:none}
+.recipe-row-emoji{width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0}
+.recipe-row-info{flex:1}
+.recipe-row-title{font-size:13px;font-weight:500;color:var(--brown)}
+.recipe-row-cat{font-size:11px;color:var(--muted)}
+.recipe-row-actions{display:flex;gap:6px}
+.row-btn{border:none;border-radius:6px;padding:5px 10px;font-size:11px;font-family:'DM Sans',sans-serif;cursor:pointer;font-weight:500}
+.row-btn.edit{background:#EFF6FF;color:#1D4ED8}
+.row-btn.hide{background:var(--amber-pale);color:#92400E}
+.row-btn.del{background:#FEE2E2;color:#991B1B}
+
+/* add recipe form */
+.add-form{display:none;background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:12px;padding:16px;margin-top:12px}
+.add-form.show{display:block}
+.form-row{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+
+/* broadcast */
+.bc-full{background:white;border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+
+/* members */
+.members-card{background:white;border-radius:14px;padding:16px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.member-row{display:flex;align-items:center;gap:10px;padding:9px 0;border-bottom:1px solid var(--border)}
+.member-row:last-child{border-bottom:none}
+.member-avatar{width:36px;height:36px;border-radius:50%;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:16px;flex-shrink:0;color:var(--green);font-weight:700;font-size:13px}
+.member-info{flex:1}
+.member-name{font-size:13px;font-weight:500}
+.member-num{font-size:11px;color:var(--muted)}
+.member-status{font-size:10px;font-weight:500;padding:3px 8px;border-radius:100px}
+.member-status.active{background:#D1FAE5;color:#166534}
+.member-status.inactive{background:#FEE2E2;color:#991B1B}
+
+/* settings */
+.settings-card{background:white;border-radius:14px;padding:16px;margin-bottom:12px;box-shadow:0 1px 4px rgba(0,0,0,0.06)}
+.settings-card-title{font-size:14px;font-weight:500;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-container{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:0;overflow:hidden}
+.yt-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1a2e,#16213e);cursor:pointer;transition:all .2s}
+.yt-placeholder:hover .yt-play-btn{transform:scale(1.1)}
+.yt-thumb{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;opacity:0.6}
+.yt-play-btn{width:64px;height:64px;background:rgba(255,0,0,0.9);border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:2;transition:transform .2s;box-shadow:0 4px 20px rgba(255,0,0,0.4)}
+.yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent white;margin-left:4px}
+.yt-title-overlay{position:absolute;bottom:0;left:0;right:0;padding:12px;background:linear-gradient(transparent,rgba(0,0,0,0.8));color:white;font-size:13px;font-weight:500;z-index:2}
+.no-video-box{height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);color:var(--muted);gap:8px}
+.no-video-icon{font-size:40px}
+.no-video-txt{font-size:13px}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-player-wrap{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:0;overflow:hidden}
+.yt-player-wrap iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-thumb-wrap{position:relative;width:100%;padding-top:56.25%;cursor:pointer;overflow:hidden}
+.yt-thumb-wrap img{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover}
+.yt-thumb-wrap .yt-play-btn{position:absolute;top:50%;left:50%;transform:translate(-50%,-50%);width:64px;height:64px;background:rgba(0,0,0,0.75);border-radius:50%;display:flex;align-items:center;justify-content:center;transition:background .2s}
+.yt-thumb-wrap:hover .yt-play-btn{background:rgba(255,0,0,0.85)}
+.yt-thumb-wrap .yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent white;margin-left:4px}
+.yt-emoji-thumb{position:relative;width:100%;padding-top:56.25%;overflow:hidden}
+.yt-emoji-inner{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-size:72px}
+.yt-no-video{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;color:white;font-size:13px;opacity:.7}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-container{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:0;overflow:hidden}
+.yt-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a1a1a;cursor:pointer;transition:background .2s}
+.yt-placeholder:hover{background:#222}
+.yt-thumb{position:absolute;inset:0;object-fit:cover;width:100%;height:100%;opacity:0.7}
+.yt-play-btn{width:68px;height:48px;background:#FF0000;border-radius:12px;display:flex;align-items:center;justify-content:center;z-index:2;transition:transform .2s}
+.yt-placeholder:hover .yt-play-btn{transform:scale(1.1)}
+.yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:10px 0 10px 20px;border-color:transparent transparent transparent white;margin-left:4px}
+.yt-title-overlay{position:absolute;bottom:0;left:0;right:0;padding:10px 14px;background:linear-gradient(transparent,rgba(0,0,0,0.8));color:white;font-size:12px;z-index:2}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-container{position:relative;width:100%;padding-top:56.25%;background:#000;overflow:hidden}
+.yt-frame{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-thumb{position:absolute;top:0;left:0;width:100%;height:100%;object-fit:cover;cursor:pointer;transition:opacity .3s}
+.yt-play-overlay{position:absolute;top:0;left:0;width:100%;height:100%;display:flex;align-items:center;justify-content:center;cursor:pointer;background:rgba(0,0,0,0.2);transition:background .2s}
+.yt-play-overlay:hover{background:rgba(0,0,0,0.35)}
+.yt-play-btn{width:64px;height:64px;background:#FF0000;border-radius:14px;display:flex;align-items:center;justify-content:center;transition:transform .2s;box-shadow:0 4px 16px rgba(0,0,0,0.4)}
+.yt-play-btn:hover{transform:scale(1.08)}
+.yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent white;margin-left:4px}
+.yt-loading{position:absolute;top:0;left:0;width:100%;height:100%;background:#000;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px}
+.yt-loading-spinner{width:36px;height:36px;border:3px solid rgba(255,255,255,0.2);border-top-color:white;border-radius:50%;animation:spin .8s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.yt-loading-txt{color:rgba(255,255,255,0.7);font-size:12px}
+.no-video{height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f3f4f6;gap:8px}
+.no-video-icon{font-size:40px}
+.no-video-txt{font-size:13px;color:var(--muted)}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-container{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:0;overflow:hidden;flex-shrink:0}
+.yt-iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1a2e,#16213e);cursor:pointer;transition:background .2s}
+.yt-placeholder:hover{background:linear-gradient(135deg,#16213e,#0f3460)}
+.yt-thumb{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0.4}
+.yt-play-btn{width:68px;height:68px;background:#FF0000;border-radius:50%;display:flex;align-items:center;justify-content:center;z-index:1;box-shadow:0 4px 20px rgba(255,0,0,0.5);transition:transform .2s}
+.yt-placeholder:hover .yt-play-btn{transform:scale(1.1)}
+.yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent white;margin-left:5px}
+.yt-title-overlay{position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:linear-gradient(transparent,rgba(0,0,0,0.8));color:white;font-size:13px;font-weight:500;z-index:1}
+.no-video-placeholder{height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#f3f4f6;color:var(--muted);gap:8px}
+.no-video-placeholder .nv-icon{font-size:40px}
+.no-video-placeholder p{font-size:13px}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-container{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:0;overflow:hidden}
+.yt-iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:#1a1a2e;cursor:pointer;transition:background .2s}
+.yt-placeholder:hover{background:#16213e}
+.yt-thumb{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;opacity:0.6}
+.yt-play-btn{width:68px;height:48px;background:#ff0000;border-radius:12px;display:flex;align-items:center;justify-content:center;z-index:2;transition:transform .2s}
+.yt-placeholder:hover .yt-play-btn{transform:scale(1.1)}
+.yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:10px 0 10px 20px;border-color:transparent transparent transparent white;margin-left:4px}
+.yt-title-bar{position:absolute;bottom:0;left:0;right:0;background:linear-gradient(transparent,rgba(0,0,0,0.8));padding:20px 14px 10px;z-index:2}
+.yt-title-txt{color:white;font-size:13px;font-weight:500}
+
+
+/* ── YOUTUBE PLAYER ── */
+.yt-container{position:relative;width:100%;padding-top:56.25%;background:#000;border-radius:0;overflow:hidden;flex-shrink:0}
+.yt-container iframe{position:absolute;top:0;left:0;width:100%;height:100%;border:none}
+.yt-placeholder{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:linear-gradient(135deg,#1a1a2e,#16213e);cursor:pointer;transition:all .2s}
+.yt-placeholder:hover{background:linear-gradient(135deg,#16213e,#0f3460)}
+.yt-thumb{position:absolute;inset:0;background-size:cover;background-position:center;opacity:0.4}
+.yt-play-btn{width:68px;height:68px;background:#FF0000;border-radius:50%;display:flex;align-items:center;justify-content:center;box-shadow:0 4px 20px rgba(255,0,0,0.4);transition:transform .2s;z-index:1}
+.yt-play-btn:hover{transform:scale(1.1)}
+.yt-play-btn::after{content:'';width:0;height:0;border-style:solid;border-width:12px 0 12px 22px;border-color:transparent transparent transparent white;margin-left:4px}
+.yt-title-overlay{position:absolute;bottom:0;left:0;right:0;padding:12px 16px;background:linear-gradient(transparent,rgba(0,0,0,0.8));color:white;font-size:13px;font-weight:500;z-index:1}
+.yt-badge{position:absolute;top:10px;right:10px;background:#FF0000;color:white;font-size:10px;font-weight:700;padding:3px 8px;border-radius:4px;z-index:1}
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════ OTP SCREEN ══════════════ -->
+<div class="screen" id="otp-screen">
+  <div class="otp-logo">Wellbeing<span>Hub</span></div>
+  <div class="otp-sub">Your private health & recipe community</div>
+  <div class="otp-card">
+    <!-- Step 1: Phone -->
+    <div class="otp-step active" id="s-phone">
+      <div class="session-pill">🔒 Members only · Verified via WhatsApp</div>
+      <div class="otp-title">Welcome!</div>
+      <div class="otp-desc">Enter your WhatsApp number to access community recipes.</div>
+      <div id="not-member-msg" style="display:none;background:#fef2f2;border:1.5px solid #fecaca;border-radius:10px;padding:10px 12px;font-size:12px;color:#dc2626;margin-bottom:12px;line-height:1.6"></div>
+      <div class="phone-row">
+        <select class="cc-input" id="cc-select" style="width:90px;padding:13px 4px;font-size:12px;cursor:pointer">
+          <option value="+91">🇮🇳 +91</option>
+          <option value="+1">🇺🇸 +1</option>
+          <option value="+44">🇬🇧 +44</option>
+          <option value="+61">🇦🇺 +61</option>
+          <option value="+971">🇦🇪 +971</option>
+          <option value="+966">🇸🇦 +966</option>
+          <option value="+65">🇸🇬 +65</option>
+          <option value="+60">🇲🇾 +60</option>
+          <option value="+94">🇱🇰 +94</option>
+          <option value="+977">🇳🇵 +977</option>
+          <option value="+880">🇧🇩 +880</option>
+          <option value="+92">🇵🇰 +92</option>
+          <option value="+27">🇿🇦 +27</option>
+          <option value="+49">🇩🇪 +49</option>
+          <option value="+33">🇫🇷 +33</option>
+          <option value="+81">🇯🇵 +81</option>
+          <option value="+86">🇨🇳 +86</option>
+          <option value="+55">🇧🇷 +55</option>
+          <option value="+234">🇳🇬 +234</option>
+          <option value="+254">🇰🇪 +254</option>
+          <option value="other">🌍 Other</option>
+        </select>
+        <input class="ph-input" id="ph-input" placeholder="Enter phone number" type="tel"/>
+      </div>
+      <div id="other-cc-wrap" style="display:none;margin-bottom:10px">
+        <input class="f-input" id="other-cc" placeholder="Enter country code e.g. +123" type="tel" style="margin-bottom:0"/>
+      </div>
+      <button class="otp-btn wa" id="send-otp-btn" onclick="sendOTP()">📲 Send OTP on WhatsApp</button>
+      <div class="otp-note">You'll stay logged in for <strong>30 days</strong> after verification.</div>
+      <div style="text-align:center;margin-top:16px;padding-top:16px;border-top:1px solid var(--border)">
+        <span style="font-size:12px;color:var(--muted)">Are you the admin? </span>
+        <span onclick="adminLogin()" style="font-size:12px;color:var(--green);font-weight:500;cursor:pointer;text-decoration:underline">Admin Login →</span>
+      </div>
+    </div>
+    <!-- Step 2: OTP -->
+    <div class="otp-step" id="s-otp">
+      <div class="otp-title">Enter OTP</div>
+      <div class="otp-desc">4-digit code sent to <strong id="ph-display"></strong> on WhatsApp</div>
+      <div class="otp-boxes">
+        <input class="otp-box" maxlength="1" type="tel" oninput="otpMove(this,0)"/>
+        <input class="otp-box" maxlength="1" type="tel" oninput="otpMove(this,1)"/>
+        <input class="otp-box" maxlength="1" type="tel" oninput="otpMove(this,2)"/>
+        <input class="otp-box" maxlength="1" type="tel" oninput="otpMove(this,3)"/>
+      </div>
+      <div class="resend-txt">Didn't get it? <span onclick="alert('OTP resent!')">Resend OTP</span></div>
+      <button class="otp-btn primary" onclick="verifyOTP()">Verify & Enter</button>
+      <div class="back-link" onclick="goBack()">← Use a different number</div>
+    </div>
+    <!-- Step 3: Success -->
+    <div class="otp-step" id="s-success">
+      <div class="success-wrap">
+        <div class="success-emoji">✅</div>
+        <div class="otp-title" style="text-align:center">You're in!</div>
+        <div class="otp-desc" style="text-align:center">Welcome to WellbeingHub. Logged in for 30 days.</div>
+        <button class="otp-btn primary" onclick="enterApp()">Enter WellbeingHub →</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════ MAIN APP ══════════════ -->
+<div class="screen hidden" id="app-screen">
+  <nav class="app-nav">
+    <div class="app-logo">Wellbeing<span>Hub</span></div>
+    <button class="admin-trigger" onclick="openPanel()">⚙️ Admin</button>
+  </nav>
+
+  <div class="app-body">
+    <!-- Hero -->
+    <div class="hero">
+      <h1>Healthy Recipes<br>for Our Community</h1>
+      <p>Curated by your nutrition experts · New recipes weekly</p>
+      <div class="hero-stats">
+        <div><div class="stat-num" id="total-count">6</div><div class="stat-lbl">Recipes</div></div>
+        <div><div class="stat-num">100</div><div class="stat-lbl">Members</div></div>
+        <div><div class="stat-num">4.8★</div><div class="stat-lbl">Avg Rating</div></div>
+      </div>
+    </div>
+
+    <!-- WA tip -->
+    <div class="wa-tip">
+      <div class="wa-tip-icon">💬</div>
+      <div class="wa-tip-text">
+        <strong>🥦 Eat fiber-rich foods in the morning to stabilise blood sugar</strong>
+        <span>Admin · Nutrition tip · 2h ago</span>
+      </div>
+    </div>
+
+    <!-- Filters -->
+    <div class="filters-wrap">
+      <div class="sec-label">Browse by category</div>
+      <div class="chips" id="chips">
+        <div class="chip active" onclick="setFilter(this,'All')">🍽️ All</div>
+        <div class="chip" onclick="setFilter(this,'Breakfast')">🌅 Breakfast</div>
+        <div class="chip" onclick="setFilter(this,'Lunch')">☀️ Lunch</div>
+        <div class="chip" onclick="setFilter(this,'Dinner')">🌙 Dinner</div>
+        <div class="chip" onclick="setFilter(this,'Soups')">🥣 Soups</div>
+        <div class="chip" onclick="setFilter(this,'Salads')">🥗 Salads</div>
+        <div class="chip" onclick="setFilter(this,'Snacks')">🥜 Snacks</div>
+      </div>
+    </div>
+
+    <!-- Search -->
+    <div class="search-wrap">
+      <div class="search-box">
+        <span class="search-icon">🔍</span>
+        <input class="search-input" id="search-input" placeholder="Search recipes, ingredients, tags..." oninput="doSearch()"/>
+      </div>
+    </div>
+
+    <!-- Recipe list -->
+    <div class="recipes-wrap">
+      <div class="list-header">
+        <div class="sec-label" id="list-label">All recipes</div>
+        <div class="count-lbl" id="list-count">6 videos</div>
+      </div>
+      <div class="recipe-list" id="recipe-list"></div>
+    </div>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav">
+    <button class="nav-btn active" onclick="switchTab(this)"><span class="nav-icon">🏠</span><span class="nav-lbl">Recipes</span></button>
+    <button class="nav-btn" onclick="switchTab(this)"><span class="nav-icon">⭐</span><span class="nav-lbl">Top Rated</span></button>
+    <button class="nav-btn" onclick="switchTab(this)"><span class="nav-icon">📢</span><span class="nav-lbl">Updates</span></button>
+    <button class="nav-btn" onclick="switchTab(this)"><span class="nav-icon">👤</span><span class="nav-lbl">Profile</span></button>
+  </div>
+</div>
+
+<!-- ══════════════ DETAIL SCREEN ══════════════ -->
+<div class="screen hidden" id="detail-screen">
+  <nav class="detail-nav">
+    <button class="back-btn" onclick="goToApp()">←</button>
+    <div class="detail-nav-title" id="detail-nav-title">Recipe</div>
+  </nav>
+  <div class="detail-body" id="detail-body"></div>
+</div>
+
+<!-- ══════════════ ADMIN PANEL ══════════════ -->
+<div class="panel-overlay" id="panel-overlay" onclick="closePanelOut(event)">
+  <div class="panel">
+    <div class="panel-hdr">
+      <div class="panel-title">Admin Panel</div>
+      <button class="close-btn" onclick="closePanel()">✕</button>
+    </div>
+    <div class="p-tabs">
+      <button class="p-tab active" onclick="pTab(this,'upload-tab')">📹 Upload</button>
+      <button class="p-tab" onclick="pTab(this,'broadcast-tab')">📢 Broadcast</button>
+      <button class="p-tab" onclick="pTab(this,'settings-tab')">⚙️ Settings</button>
+    </div>
+
+    <!-- Upload tab -->
+    <div id="upload-tab">
+      <div class="form-grp"><label class="form-lbl">Recipe Title</label><input class="f-input" placeholder="e.g. Turmeric Oats Porridge" type="text"/></div>
+      <div class="form-grp"><label class="form-lbl">Category</label>
+        <select class="f-select"><option>Breakfast</option><option>Lunch</option><option>Dinner</option><option>Soups</option><option>Salads</option><option>Snacks</option></select>
+      </div>
+      <div class="form-grp"><label class="form-lbl">YouTube Video URL</label><input class="f-input" placeholder="https://youtube.com/watch?v=..." type="url"/></div>
+      <div class="form-grp"><label class="form-lbl">Nutrition Tags</label><input class="f-input" placeholder="e.g. High fiber, Low sugar, Vegan"/></div>
+      <div class="form-grp"><label class="form-lbl">Duration (mins)</label><input class="f-input" placeholder="2" type="number"/></div>
+      <div class="form-grp"><label class="form-lbl">Notes (optional)</label><textarea class="f-textarea" rows="2" placeholder="Any extra tip for members..."></textarea></div>
+      <button class="pub-btn" onclick="alert('✅ Recipe published! Add the data to your Google Sheet too.')">Publish Recipe</button>
+    </div>
+
+    <!-- Settings tab -->
+    <div id="settings-tab" style="display:none">
+      <div style="background:#f0fdf4;border:1.5px solid #bbf7d0;border-radius:14px;padding:16px;margin-bottom:14px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px">
+          <div style="width:34px;height:34px;background:var(--green);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px">🔐</div>
+          <div><strong style="font-size:13px;color:#166534;display:block">Change Admin Password</strong><span style="font-size:11px;color:#4ade80">Only you can see this panel</span></div>
+        </div>
+        <div class="form-grp">
+          <label class="form-lbl">Current Password</label>
+          <input class="f-input" id="curr-pwd" type="password" placeholder="Enter current password"/>
+        </div>
+        <div class="form-grp">
+          <label class="form-lbl">New Password</label>
+          <input class="f-input" id="new-pwd" type="password" placeholder="Min 6 characters"/>
+        </div>
+        <div class="form-grp">
+          <label class="form-lbl">Confirm New Password</label>
+          <input class="f-input" id="conf-pwd" type="password" placeholder="Re-enter new password"/>
+        </div>
+        <div id="pwd-msg" style="font-size:12px;margin-bottom:10px;min-height:18px"></div>
+        <button class="pub-btn" onclick="changePassword()">🔐 Update Password</button>
+      </div>
+
+      <div style="background:#fff7ed;border:1.5px solid #fed7aa;border-radius:14px;padding:16px">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:12px">
+          <div style="width:34px;height:34px;background:#f97316;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:15px">ℹ️</div>
+          <div><strong style="font-size:13px;color:#9a3412;display:block">App Info</strong><span style="font-size:11px;color:#fb923c">WellbeingHub v1.0 · Phase 1</span></div>
+        </div>
+        <div style="font-size:12px;color:#92400e;line-height:1.8">
+          👥 Community: 100 members<br/>
+          📹 Recipes: <span id="info-count">6</span> videos<br/>
+          🔒 Auth: WhatsApp OTP (Phase 2)<br/>
+          📢 Broadcast: Wati.io (Phase 2)<br/>
+          🌐 Hosting: GitHub Pages · Free
+        </div>
+      </div>
+    </div>
+    <!-- Broadcast tab -->
+    <div id="broadcast-tab" style="display:none">
+      <div class="coming-soon">⚠️ Wati.io integration coming in Phase 2. UI is ready — just needs API connection.</div>
+      <div class="bc-box">
+        <div class="bc-hdr">
+          <div class="bc-icon">💬</div>
+          <div class="bc-hdr-txt"><strong>Compose Broadcast</strong><span>Sends to all 100 members via WhatsApp</span></div>
+        </div>
+        <div class="form-lbl" style="margin-bottom:6px">Attach Media</div>
+        <div class="media-row">
+          <button class="media-btn" onclick="simMedia('image')"><span class="media-btn-icon">🖼️</span><span class="media-btn-lbl">Image</span></button>
+          <button class="media-btn" onclick="simMedia('video')"><span class="media-btn-icon">🎥</span><span class="media-btn-lbl">Video</span></button>
+          <button class="media-btn" onclick="simMedia('pdf')"><span class="media-btn-icon">📄</span><span class="media-btn-lbl">PDF</span></button>
+          <button class="media-btn" onclick="toggleEmoji()"><span class="media-btn-icon">😊</span><span class="media-btn-lbl">Emoji</span></button>
+        </div>
+        <div class="media-preview" id="media-preview">
+          <div class="prev-thumb" id="prev-thumb">🖼️</div>
+          <div class="prev-info"><div class="prev-name" id="prev-name">file.jpg</div><div class="prev-size" id="prev-size">Ready to send</div></div>
+          <button class="prev-rm" onclick="removeMedia()">✕</button>
+        </div>
+        <div class="emoji-picker" id="emoji-picker">
+          <div class="ep-title">Health & food emojis</div>
+          <div class="ep-grid" id="ep-grid"></div>
+        </div>
+        <div class="form-lbl" style="margin-bottom:6px">Message</div>
+        <div class="msg-wrap">
+          <div class="msg-toolbar">
+            <button class="tb-btn" style="font-weight:700" onclick="fmt('bold')">B</button>
+            <button class="tb-btn" style="font-style:italic" onclick="fmt('italic')">I</button>
+            <button class="tb-btn" style="text-decoration:line-through" onclick="fmt('strikeThrough')">S</button>
+            <div class="tb-divider"></div>
+            <button class="tb-btn" onclick="tpl('💡 Nutrition Tip:\n\n')">💡 Tip</button>
+            <button class="tb-btn" onclick="tpl('⚠️ Important Update:\n\n')">⚠️ Alert</button>
+            <button class="tb-btn" onclick="tpl('🍽️ New Recipe Alert!\n\n')">🍽️ Recipe</button>
+          </div>
+          <div id="msg-editor" class="msg-editor" contenteditable="true" oninput="updCount()"></div>
+          <div class="msg-footer"><span class="char-cnt" id="char-cnt">0 / 1000</span></div>
+        </div>
+        <div class="sched-row">
+          <label class="tog-track"><input type="checkbox" id="sched-tog" onchange="toggleSched()"/><span class="tog-slider"></span></label>
+          <span class="sched-lbl">Schedule for later</span>
+          <input type="datetime-local" class="sched-input" id="sched-input"/>
+        </div>
+        <button class="wa-send" onclick="sendBc()">📲 Send to All 100 Members</button>
+        <div class="wa-note">✓ Verified members only · Via WhatsApp Business API</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── DATA ──
+// Recipes are loaded live from Google Sheet — do not hardcode here
+let RECIPES = [];
+
+// ── LOAD RECIPES FROM GOOGLE SHEET ──
+const SHEET_ID = '1PH3ewef8ti1NN-qLg5YznUAsMpEwj5EJqUBtSUTeW5k';
+const CAT_EMOJIS = {Breakfast:'🥣',Lunch:'🥗',Dinner:'🍛',Soups:'🍲',Salads:'🥦',Snacks:'🥜'};
+
+async function loadRecipes(){
+  showRecipesLoading();
+  try {
+    // Try all possible tab names (with and without emoji)
+    const tabs = ['Recipes','📹 Recipes','recipes','Sheet1','Sheet2'];
+    let rows = null;
+    for(const tab of tabs){
+      try {
+        const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tab)}`;
+        const res = await fetch(url);
+        const text = await res.text();
+        const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*?)\);/s)[1]);
+        if(json.table && json.table.rows && json.table.rows.length > 1){
+          rows = json.table.rows;
+          console.log('✅ Found recipes in tab:', tab, '| Total rows:', rows.length);
+          break;
+        }
+      } catch(e){ console.log('Tab not found:', tab); continue; }
+    }
+    if(!rows || rows.length < 1) throw new Error('No recipe data found. Check the sheet is shared publicly (Anyone with link → Viewer).');
+
+    // ── Smart header detection ──
+    // Find the row where col[0] looks like "Recipe ID" or col[1] looks like "Recipe Title"
+    // This handles sheets with 1 or 2 intro/instruction rows at the top
+    let dataStartIdx = 0;
+    for(let i = 0; i < Math.min(rows.length, 5); i++){
+      const c0 = rows[i].c?.[0]?.v?.toString().toLowerCase() || '';
+      const c1 = rows[i].c?.[1]?.v?.toString().toLowerCase() || '';
+      if(c0.includes('recipe id') || c1.includes('recipe title') || c1.includes('title')){
+        dataStartIdx = i + 1; // skip the header row itself
+        console.log('📋 Header row found at index:', i, '→ data starts at:', dataStartIdx);
+        break;
+      }
+    }
+    // If no header row found, skip just the first row (default)
+    if(dataStartIdx === 0) dataStartIdx = 1;
+
+    RECIPES = rows.slice(dataStartIdx)
+      .filter(r => {
+        // Must have a title in col B (index 1)
+        const title = r.c?.[1]?.v?.toString().trim();
+        if(!title) return false;
+        // Skip rows where title looks like a header
+        if(title.toLowerCase().includes('recipe title') || title.toLowerCase().includes('title')) return false;
+        return true;
+      })
+      .map((r, i) => {
+        const cat = r.c[2]?.v?.toString().trim() || 'Breakfast';
+        return {
+          id: i + 1,
+          title: r.c[1]?.v?.toString().trim() || '',
+          cat: cat,
+          url: r.c[3]?.v?.toString().trim() || '',
+          tags: (r.c[5]?.v?.toString() || '').split(',').map(t => t.trim()).filter(Boolean),
+          dur: r.c[6]?.v?.toString().trim() || '2:00',
+          rating: 4.5,
+          notes: r.c[10]?.v?.toString().trim() || '',
+          emoji: CAT_EMOJIS[cat] || '🍽️'
+        };
+      });
+
+    console.log('✅ Active recipes loaded:', RECIPES.length);
+
+    if(!RECIPES.length) throw new Error('No recipe data found. Make sure the sheet is shared publicly (Anyone with link → Viewer) and rows have titles in Column B.');
+    
+    renderRecipes();
+    if(document.getElementById('total-count')) 
+      document.getElementById('total-count').textContent = RECIPES.length;
+
+  } catch(e) {
+    console.error('Recipe load error:', e);
+    showRecipesError(e.message);
+  }
+}
+
+function showRecipesLoading(){
+  const el = document.getElementById('recipe-list');
+  if(el) el.innerHTML = `
+    <div style="text-align:center;padding:40px 20px;color:var(--muted)">
+      <div style="font-size:36px;margin-bottom:10px">⏳</div>
+      <div style="font-size:13px">Loading recipes from Google Sheet...</div>
+    </div>`;
+}
+
+function showRecipesError(msg){
+  const el = document.getElementById('recipe-list');
+  if(el) el.innerHTML = `
+    <div style="text-align:center;padding:40px 20px">
+      <div style="font-size:36px;margin-bottom:10px">⚠️</div>
+      <div style="font-size:13px;color:var(--text);margin-bottom:6px;font-weight:500">Could not load recipes</div>
+      <div style="font-size:11px;color:#dc2626;margin-bottom:14px;line-height:1.6">${msg}</div>
+      <button onclick="loadRecipes()" style="background:var(--green);color:white;border:none;border-radius:8px;padding:10px 20px;font-size:13px;cursor:pointer;font-family:'DM Sans',sans-serif">🔄 Try Again</button>
+    </div>`;
+}
+
+const EMOJIS=['🥦','🥗','🍎','🥑','🫐','🍋','🥕','🌿','🍵','💪','❤️','🌟','✅','⚡','🔥','💧','🌱','🧘','🏃','💯','📌','⚠️','💡','🧠','🩺','🍽️','🥣','🍲','🍛','🥜','🫁','👏'];
+
+let adminPassword = localStorage.getItem('wbh_pwd') || 'WBH@2026';
+let currentFilter = 'All';
+let currentSearch = '';
+let ratings = {};
+
+// ── OTP FLOW ──
+function getCCode(){
+  const sel = document.getElementById('cc-select').value;
+  if(sel==='other'){
+    const oc = document.getElementById('other-cc').value.trim();
+    return oc.startsWith('+') ? oc : '+'+oc;
+  }
+  return sel;
+}
+
+document.addEventListener('DOMContentLoaded',()=>{
+  document.getElementById('cc-select').addEventListener('change', function(){
+    document.getElementById('other-cc-wrap').style.display = this.value==='other'?'block':'none';
+  });
+});
+
+async function sendOTP(){
+  const ph = document.getElementById('ph-input').value.replace(/\s/g,'');
+  const cc = getCCode();
+  if(!ph||ph.length<5){alert('Please enter a valid phone number');return;}
+  if(cc==='other'||!cc){alert('Please enter a valid country code');return;}
+  const btn = document.getElementById('send-otp-btn');
+  btn.textContent = '⏳ Checking membership...';
+  btn.disabled = true;
+  try {
+    const fullNum = cc+ph;
+    const isMember = await checkMember(fullNum);
+    if(!isMember){
+      btn.textContent = '📲 Send OTP on WhatsApp';
+      btn.disabled = false;
+      showNotMember();
+      return;
+    }
+    document.getElementById('ph-display').textContent = fullNum;
+    document.getElementById('not-member-msg').style.display='none';
+    showStep('s-otp');
+    setTimeout(()=>document.querySelectorAll('.otp-box')[0].focus(),100);
+  } catch(e) {
+    btn.textContent = '📲 Send OTP on WhatsApp';
+    btn.disabled = false;
+    const msg = document.getElementById('not-member-msg');
+    msg.style.display='block';
+    msg.innerHTML = '⚠️ <strong>Could not verify membership.</strong><br/>Please check your internet connection and try again. If the problem persists, contact your admin.';
+  }
+}
+
+async function checkMember(phone){
+  const sheetId = '1PH3ewef8ti1NN-qLg5YznUAsMpEwj5EJqUBtSUTeW5k';
+  // Try both Members tab names
+  const tabs = ['Members','👥 Members','members','Sheet2'];
+  let rows = null;
+  for(const tab of tabs){
+    try{
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tab)}`;
+      const res = await fetch(url);
+      const text = await res.text();
+      const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*?)\);/s)[1]);
+      if(json.table && json.table.rows && json.table.rows.length){
+        rows = json.table.rows; break;
+      }
+    } catch(e){ continue; }
+  }
+  if(!rows) return false;
+  const normalize = n => n.toString().replace(/[\s\-()]/g,'').replace(/^\+/,'');
+  const inputNorm = normalize(phone);
+  // Filter to rows that look like actual phone numbers (skip header/instruction rows)
+  const numbers = rows
+    .map(r => r.c?.[2]?.v?.toString() || '')
+    .filter(n => /^\+?\d{7,}/.test(n.replace(/\s/g,'')));
+  console.log('Members found in sheet:', numbers.length);
+  return numbers.some(n => normalize(n) === inputNorm);
+}
+
+function showNotMember(){
+  const msg = document.getElementById('not-member-msg');
+  msg.style.display='block';
+  msg.innerHTML = '❌ <strong>This number is not registered.</strong><br/>Please contact your community admin to get access.';
+}
+function otpMove(el,idx){
+  if(el.value.length===1){
+    const boxes=document.querySelectorAll('.otp-box');
+    if(idx<3)boxes[idx+1].focus();
+    else verifyOTP();
+  }
+}
+function verifyOTP(){
+  const code=Array.from(document.querySelectorAll('.otp-box')).map(b=>b.value).join('');
+  if(code.length<4){alert('Please enter the 4-digit OTP');return;}
+  showStep('s-success');
+}
+function goBack(){
+  // Reset button BEFORE switching step
+  const btn = document.getElementById('send-otp-btn');
+  btn.textContent = '📲 Send OTP on WhatsApp';
+  btn.disabled = false;
+  document.getElementById('not-member-msg').style.display='none';
+  document.getElementById('ph-input').value='';
+  showStep('s-phone');
+}
+function showStep(id){
+  document.querySelectorAll('.otp-step').forEach(s=>s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+function enterApp(){
+  document.getElementById('otp-screen').classList.add('slide-left');
+  document.getElementById('app-screen').classList.remove('hidden');
+  loadRecipes();
+}
+
+// ── RECIPE RENDER ──
+function getFiltered(){
+  return RECIPES.filter(r=>{
+    const matchCat = currentFilter==='All'||r.cat===currentFilter;
+    const q = currentSearch.toLowerCase();
+    const matchQ = !q||r.title.toLowerCase().includes(q)||r.cat.toLowerCase().includes(q)||r.tags.join(' ').toLowerCase().includes(q)||r.notes.toLowerCase().includes(q);
+    return matchCat && matchQ;
+  });
+}
+function renderRecipes(){
+  const list = getFiltered();
+  const el = document.getElementById('recipe-list');
+  document.getElementById('list-count').textContent = list.length+' video'+(list.length!==1?'s':'');
+  document.getElementById('list-label').textContent = currentFilter==='All'?'All recipes':'Category: '+currentFilter;
+  if(document.getElementById('total-count')) document.getElementById('total-count').textContent = RECIPES.length;
+  if(!list.length){
+    el.innerHTML='<div class="empty-state"><div class="empty-icon">🔍</div><p>No recipes found.<br>Try a different search or filter.</p></div>';
+    return;
+  }
+  el.innerHTML = list.map((r,i)=>`
+    <div class="recipe-card" style="animation-delay:${i*0.06}s" onclick="openDetail(${r.id})">
+      <div class="card-thumb ${r.cat.toLowerCase()}">
+        ${r.emoji}
+        <div class="dur-badge">${r.dur}</div>
+        <div class="play-circle"></div>
+      </div>
+      <div class="card-body">
+        <div>
+          <div class="card-cat">${r.cat}</div>
+          <div class="card-title">${r.title}</div>
+        </div>
+        <div>
+          <div class="card-footer">
+            <div class="card-tags">${r.tags.map(t=>`<span class="tag">${t}</span>`).join('')}</div>
+            <div class="card-rating"><span class="stars">★★★★★</span> ${ratings[r.id]||r.rating}</div>
+          </div>
+          <div class="rate-row">
+            <span class="rate-lbl">Rate:</span>
+            <div class="star-btns" id="sb-${r.id}">
+              ${[1,2,3,4,5].map(v=>`<button class="sbtn" onclick="rateCard(event,${r.id},${v})">★</button>`).join('')}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>`).join('');
+}
+function setFilter(el,cat){
+  document.querySelectorAll('.chip').forEach(c=>c.classList.remove('active'));
+  el.classList.add('active');
+  currentFilter=cat;
+  renderRecipes();
+}
+function doSearch(){
+  currentSearch=document.getElementById('search-input').value;
+  renderRecipes();
+}
+function rateCard(e,id,val){
+  e.stopPropagation();
+  ratings[id]=val.toFixed(1);
+  const btns=document.querySelectorAll(`#sb-${id} .sbtn`);
+  btns.forEach((b,i)=>b.classList.toggle('lit',i<val));
+}
+
+// ── DETAIL SCREEN ──
+function getYTId(url){
+  if(!url||url==='#') return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/,
+    /youtube\.com\/shorts\/([\w-]{11})/
+  ];
+  for(const p of patterns){
+    const m = url.match(p);
+    if(m) return m[1];
+  }
+  return null;
+}
+
+function buildVideoPlayer(r){
+  const ytId = getYTId(r.url);
+  if(!ytId) return `
+    <div class="no-video-box">
+      <div class="no-video-icon">🎬</div>
+      <div class="no-video-txt">No video added yet</div>
+      <div style="font-size:11px;color:var(--muted)">Admin can add a YouTube URL</div>
+    </div>`;
+  return `
+    <div class="yt-container" id="yt-wrap-${r.id}">
+      <div class="yt-placeholder" onclick="loadYTPlayer(${r.id},'${ytId}')">
+        <img class="yt-thumb" src="https://img.youtube.com/vi/${ytId}/maxresdefault.jpg" 
+             onerror="this.src='https://img.youtube.com/vi/${ytId}/0.jpg'"
+             alt="${r.title}"/>
+        <div class="yt-play-btn"></div>
+        <div class="yt-title-overlay">${r.title}</div>
+      </div>
+    </div>`;
+}
+
+function loadYTPlayer(id, ytId){
+  const wrap = document.getElementById('yt-wrap-'+id);
+  wrap.innerHTML = `<iframe 
+    src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1&playsinline=1" 
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen>
+  </iframe>`;
+}
+
+function openDetail(id){
+  const r=RECIPES.find(x=>x.id===id);
+  document.getElementById('detail-nav-title').textContent=r.title;
+  document.getElementById('detail-body').innerHTML=`
+    ${buildVideoPlayer(r)}
+    <div class="detail-content">
+      <div class="detail-cat">${r.cat}</div>
+      <div class="detail-title">${r.title}</div>
+      <div class="detail-tags">${r.tags.map(t=>`<span class="detail-tag">${t}</span>`).join('')}</div>
+      <div class="info-grid">
+        <div class="info-card"><div class="info-val">${r.dur}</div><div class="info-key">Duration</div></div>
+        <div class="info-card"><div class="info-val">${ratings[r.id]||r.rating}★</div><div class="info-key">Rating</div></div>
+      </div>
+      <button class="share-btn" onclick="shareRecipe('${r.title}')">↗ Share with Friends</button>
+      <div class="rating-section">
+        <div class="rating-title">Rate this recipe</div>
+        <div class="big-stars" id="big-stars-${r.id}">
+          ${[1,2,3,4,5].map(v=>`<span class="big-star" onclick="rateDetail(${r.id},${v})">★</span>`).join('')}
+        </div>
+        <div class="rating-note" id="rating-note-${r.id}">Tap stars to rate</div>
+      </div>
+      ${r.notes?`<div class="notes-section"><div class="notes-title">💡 Admin tip</div><div class="notes-text">${r.notes}</div></div>`:''}
+    </div>`;
+  document.getElementById('app-screen').classList.add('slide-left');
+  document.getElementById('detail-screen').classList.remove('hidden');
+  // Render YouTube player after screen is shown
+  setTimeout(()=>renderYTPlayer(r.url, `yt-player-${r.id}`), 100);
+}
+function goToApp(){
+  // Stop video playing when navigating back
+  const iframe = document.querySelector('#detail-screen iframe');
+  if(iframe) iframe.src = iframe.src;
+  document.getElementById('detail-screen').classList.add('hidden');
+  document.getElementById('app-screen').classList.remove('slide-left');
+  renderRecipes();
+}
+function openVideo(url){if(url&&url!=='#')window.open(url,'_blank');}
+function shareRecipe(title){
+  if(navigator.share){navigator.share({title:'WellbeingHub Recipe',text:'Check out this healthy recipe: '+title,url:window.location.href});}
+  else{navigator.clipboard&&navigator.clipboard.writeText(window.location.href);alert('Link copied!');}
+}
+function rateDetail(id,val){
+  ratings[id]=val.toFixed(1);
+  document.querySelectorAll(`#big-stars-${id} .big-star`).forEach((s,i)=>s.classList.toggle('lit',i<val));
+  document.getElementById(`rating-note-${id}`).textContent='Thanks for rating! ⭐'.repeat(val>3?1:0)||'Rating saved';
+}
+
+// ── NAV ──
+function switchTab(el){
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  el.classList.add('active');
+}
+
+// ── ADMIN PANEL ──
+function openPanel(){
+  const pwd = prompt('🔐 Enter Admin Password:');
+  if(pwd === null) return;
+  if(pwd !== adminPassword){
+    alert('❌ Incorrect password. Members cannot access the admin panel.');
+    return;
+  }
+  // Navigate to full admin screen
+  document.getElementById('app-screen').classList.add('slide-left');
+  document.getElementById('admin-screen').classList.remove('hidden');
+  renderAdminRecipes();
+  renderAdminMembers();
+  renderCategories();
+  document.getElementById('a-recipes').textContent = RECIPES.length;
+  document.getElementById('info-count').textContent = RECIPES.length;
+  buildEmojiGrid();
+}
+function closePanel(){document.getElementById('panel-overlay').classList.remove('open');}
+function closePanelOut(e){if(e.target===document.getElementById('panel-overlay'))closePanel();}
+function pTab(el,tabId){
+  document.querySelectorAll('.p-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  ['upload-tab','broadcast-tab','settings-tab'].forEach(t=>document.getElementById(t).style.display=t===tabId?'block':'none');
+  if(tabId==='settings-tab')document.getElementById('info-count').textContent=RECIPES.length;
+}
+function buildEmojiGrid(){
+  const g=document.getElementById('ep-grid');
+  if(g.children.length)return;
+  EMOJIS.forEach(e=>{const s=document.createElement('span');s.className='ep-item';s.textContent=e;s.onclick=()=>insertEmoji(e);g.appendChild(s);});
+}
+function toggleEmoji(){document.getElementById('emoji-picker').classList.toggle('show');}
+function insertEmoji(e){const ed=document.getElementById('msg-editor');ed.focus();document.execCommand('insertText',false,e);updCount();}
+function simMedia(type){
+  const m={image:['🖼️','nutrition_tips.jpg','320 KB'],video:['🎥','recipe_preview.mp4','1.8 MB'],pdf:['📄','diet_plan.pdf','240 KB']};
+  const [icon,name,size]=m[type];
+  document.getElementById('prev-thumb').textContent=icon;
+  document.getElementById('prev-name').textContent=name;
+  document.getElementById('prev-size').textContent=size+' · Ready to send';
+  document.getElementById('media-preview').classList.add('show');
+}
+function removeMedia(){document.getElementById('media-preview').classList.remove('show');}
+function fmt(cmd){document.getElementById('msg-editor').focus();document.execCommand(cmd,false,null);}
+function tpl(t){document.getElementById('msg-editor').focus();document.execCommand('insertText',false,t);updCount();}
+function updCount(){const l=document.getElementById('msg-editor').innerText.length;document.getElementById('char-cnt').textContent=l+' / 1000';}
+function toggleSched(){const i=document.getElementById('sched-input');i.style.display=document.getElementById('sched-tog').checked?'block':'none';}
+function sendBc(){
+  const msg=document.getElementById('msg-editor').innerText.trim();
+  if(!msg){alert('Please type a message first.');return;}
+  alert('✅ Message queued! Connect Wati.io in Phase 2 to send to all 100 members.');
+}
+
+// ── CHANGE PASSWORD ──
+function changePassword(){
+  const curr = document.getElementById('curr-pwd').value;
+  const nw = document.getElementById('new-pwd').value;
+  const conf = document.getElementById('conf-pwd').value;
+  const msg = document.getElementById('pwd-msg');
+  if(!curr||!nw||!conf){msg.style.color='#dc2626';msg.textContent='❌ Please fill all fields.';return;}
+  if(curr !== adminPassword){msg.style.color='#dc2626';msg.textContent='❌ Current password is incorrect.';return;}
+  if(nw.length < 6){msg.style.color='#dc2626';msg.textContent='❌ New password must be at least 6 characters.';return;}
+  if(nw !== conf){msg.style.color='#dc2626';msg.textContent='❌ New passwords do not match.';return;}
+  adminPassword = nw;
+  localStorage.setItem('wbh_pwd', nw);
+  msg.style.color='#16a34a';
+  msg.textContent='✅ Password updated successfully!';
+  document.getElementById('curr-pwd').value='';
+  document.getElementById('new-pwd').value='';
+  document.getElementById('conf-pwd').value='';
+  setTimeout(()=>msg.textContent='',3000);
+}
+
+// ── ADMIN SCREEN ──
+function exitAdmin(){
+  document.getElementById('admin-screen').classList.add('hidden');
+  // Go back to wherever admin came from
+  if(!document.getElementById('app-screen').classList.contains('slide-left')){
+    // Came from OTP screen
+    document.getElementById('otp-screen').classList.remove('slide-left');
+  } else {
+    // Came from app screen
+    document.getElementById('app-screen').classList.remove('slide-left');
+    loadRecipes();
+  }
+}
+
+function adminTab(el, tabId){
+  document.querySelectorAll('.admin-tab').forEach(t=>t.classList.remove('active'));
+  el.classList.add('active');
+  document.querySelectorAll('.admin-tab-content').forEach(t=>t.classList.remove('active'));
+  document.getElementById(tabId).classList.add('active');
+}
+
+function toggleAddForm(){
+  document.getElementById('add-form').classList.toggle('show');
+}
+
+function renderAdminRecipes(){
+  const q = (document.getElementById('admin-search')?.value||'').toLowerCase();
+  const cat = document.getElementById('admin-cat-filter')?.value||'All';
+  const filtered = RECIPES.filter(r=>{
+    const matchQ = !q||r.title.toLowerCase().includes(q)||r.tags.join(' ').toLowerCase().includes(q);
+    const matchC = cat==='All'||r.cat===cat;
+    return matchQ && matchC;
+  });
+  const countEl = document.getElementById('admin-recipe-count');
+  if(countEl) countEl.textContent = filtered.length + ' of ' + RECIPES.length + ' recipes';
+  const list = document.getElementById('admin-recipe-list');
+  if(!filtered.length){
+    list.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">🔍 No recipes found</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(r=>`
+    <div class="recipe-row">
+      <div class="recipe-row-emoji" style="background:${getCatBg(r.cat)};width:38px;height:38px;border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${r.emoji}</div>
+      <div class="recipe-row-info">
+        <div class="recipe-row-title">${r.title}</div>
+        <div class="recipe-row-cat">${r.cat} · ${r.dur}</div>
+      </div>
+      <div class="recipe-row-actions">
+        <button class="row-btn hide" onclick="toggleRecipe(${r.id})" title="Show/Hide"">👁️</button>
+        <button class="row-btn del" onclick="deleteRecipe(${r.id})" title="Delete">🗑️</button>
+      </div>
+    </div>`).join('');
+}
+
+function getCatBg(cat){
+  const map={Breakfast:'#FEF3C7',Lunch:'#D1FAE5',Dinner:'#E0E7FF',Soups:'#FCE7F3',Salads:'#ECFDF5',Snacks:'#FEF3C7'};
+  return map[cat]||'#f3f4f6';
+}
+
+function toggleRecipe(id){
+  alert('In Phase 2 this will show/hide the recipe for members. For now update Active column in Google Sheet.');
+}
+
+function deleteRecipe(id){
+  if(!confirm('Delete this recipe? This cannot be undone.')) return;
+  const idx = RECIPES.findIndex(r=>r.id===id);
+  if(idx>-1){ RECIPES.splice(idx,1); renderAdminRecipes(); document.getElementById('a-recipes').textContent=RECIPES.length; }
+}
+
+function addRecipe(){
+  const title = document.getElementById('new-title').value.trim();
+  const cat = document.getElementById('new-cat').value;
+  const dur = document.getElementById('new-dur').value.trim() || '2:00';
+  const url = document.getElementById('new-url').value.trim();
+  const tags = document.getElementById('new-tags').value.trim().split(',').map(t=>t.trim()).filter(Boolean);
+  const notes = document.getElementById('new-notes').value.trim();
+  if(!title){ alert('Please enter a recipe title'); return; }
+  const emojis={Breakfast:'🥣',Lunch:'🥗',Dinner:'🍛',Soups:'🍲',Salads:'🥦',Snacks:'🥜'};
+  const newId = RECIPES.length ? Math.max(...RECIPES.map(r=>r.id))+1 : 1;
+  RECIPES.push({id:newId,title,cat,emoji:emojis[cat]||'🍽️',url:url||'#',tags,dur,rating:0,notes});
+  document.getElementById('new-title').value='';
+  document.getElementById('new-url').value='';
+  document.getElementById('new-tags').value='';
+  document.getElementById('new-notes').value='';
+  document.getElementById('add-form').classList.remove('show');
+  renderAdminRecipes();
+  document.getElementById('a-recipes').textContent=RECIPES.length;
+  alert('✅ Recipe added! Also update your Google Sheet to make it permanent.');
+}
+
+
+// Members stored in memory (sync with Google Sheet manually)
+let MEMBERS = [
+  {id:1, name:'Priya Sharma',   num:'+919876543210', country:'India 🇮🇳',   active:true},
+  {id:2, name:'Rahul Verma',    num:'+919765432109', country:'India 🇮🇳',   active:true},
+  {id:3, name:'Ahmed Al Farsi', num:'+971501234567', country:'UAE 🇦🇪',     active:true},
+  {id:4, name:'Sara Johnson',   num:'+447911123456', country:'UK 🇬🇧',      active:true},
+  {id:5, name:'John Smith',     num:'+12025551234',  country:'USA 🇺🇸',     active:false},
+];
+
+function renderAdminMembers(){
+  const q = (document.getElementById('member-search')?.value||'').toLowerCase();
+  const filtered = MEMBERS.filter(m=>
+    !q || m.name.toLowerCase().includes(q) || m.num.includes(q)
+  );
+  const countEl = document.getElementById('member-count');
+  if(countEl) countEl.textContent = filtered.length + ' of ' + MEMBERS.length + ' members';
+  const list = document.getElementById('admin-members-list');
+  if(!filtered.length){
+    list.innerHTML='<div style="text-align:center;padding:20px;color:var(--muted);font-size:13px">🔍 No members found</div>';
+    return;
+  }
+  list.innerHTML = filtered.map(m=>`
+    <div class="member-row" id="mrow-${m.id}">
+      <div class="member-avatar">${m.name.split(' ').map(n=>n[0]).join('')}</div>
+      <div class="member-info">
+        <div class="member-name">${m.country} ${m.name}</div>
+        <div class="member-num">${m.num}</div>
+      </div>
+      <div style="display:flex;gap:5px;align-items:center">
+        <span class="member-status ${m.active?'active':'inactive'}" style="cursor:pointer" onclick="toggleMember(${m.id})">${m.active?'Active':'Inactive'}</span>
+        <button class="row-btn del" onclick="removeMember(${m.id})" title="Remove">🗑️</button>
+      </div>
+    </div>`).join('') +
+    `<div style="margin-top:10px;padding:8px 10px;background:var(--amber-pale);border-radius:8px;font-size:11px;color:#92400E">
+      ⚠️ Changes here are temporary. Update your Google Sheet to make them permanent.
+    </div>`;
+}
+
+function toggleMember(id){
+  const m = MEMBERS.find(x=>x.id===id);
+  if(!m) return;
+  m.active = !m.active;
+  renderAdminMembers();
+}
+
+function removeMember(id){
+  const m = MEMBERS.find(x=>x.id===id);
+  if(!confirm('Remove ' + m.name + ' from community?')) return;
+  MEMBERS = MEMBERS.filter(x=>x.id!==id);
+  renderAdminMembers();
+  alert('✅ Removed! Also delete their number from Google Sheet Column C.');
+}
+
+function toggleMemberForm(){
+  document.getElementById('member-form').classList.toggle('show');
+}
+
+function addMember(){
+  const name = document.getElementById('new-m-name').value.trim();
+  const num = document.getElementById('new-m-num').value.trim();
+  const country = document.getElementById('new-m-country').value;
+  if(!name){ alert('Please enter member name'); return; }
+  if(!num){ alert('Please enter WhatsApp number'); return; }
+  if(!num.startsWith('+')){ alert('Number must start with country code e.g. +91'); return; }
+  const newId = MEMBERS.length ? Math.max(...MEMBERS.map(m=>m.id))+1 : 1;
+  MEMBERS.push({id:newId, name, num, country, active:true});
+  document.getElementById('new-m-name').value='';
+  document.getElementById('new-m-num').value='';
+  document.getElementById('member-form').classList.remove('show');
+  renderAdminMembers();
+  alert('✅ Member added! Also add +' + num + ' to Google Sheet Column C to enable their login.');
+}
+
+
+// ── ADMIN LOGIN FROM OTP SCREEN ──
+function adminLogin(){
+  const pwd = prompt('🔐 Enter Admin Password:');
+  if(pwd === null) return;
+  if(pwd !== adminPassword){
+    alert('❌ Incorrect password.');
+    return;
+  }
+  // Go directly to admin screen from OTP screen
+  document.getElementById('otp-screen').classList.add('slide-left');
+  document.getElementById('admin-screen').classList.remove('hidden');
+  renderAdminRecipes();
+  renderAdminMembers();
+  renderCategories();
+  document.getElementById('a-recipes').textContent = RECIPES.length;
+  document.getElementById('info-count').textContent = RECIPES.length;
+  buildEmojiGrid();
+}
+
+
+// ── CATEGORY MANAGEMENT ──
+let CATEGORIES = [
+  {name:'Breakfast', emoji:'🌅'},
+  {name:'Lunch', emoji:'☀️'},
+  {name:'Dinner', emoji:'🌙'},
+  {name:'Soups', emoji:'🥣'},
+  {name:'Salads', emoji:'🥗'},
+  {name:'Snacks', emoji:'🥜'},
+];
+
+function toggleCatForm(){
+  document.getElementById('cat-form').classList.toggle('show');
+}
+
+function renderCategories(){
+  const list = document.getElementById('cat-list');
+  if(!list) return;
+  list.innerHTML = CATEGORIES.map((c,i)=>`
+    <div class="recipe-row">
+      <div style="width:36px;height:36px;border-radius:8px;background:var(--green-pale);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0">${c.emoji}</div>
+      <div class="recipe-row-info">
+        <div class="recipe-row-title">${c.name}</div>
+        <div class="recipe-row-cat">${RECIPES.filter(r=>r.cat===c.name).length} recipes</div>
+      </div>
+      <div class="recipe-row-actions">
+        ${i>=6?`<button class="row-btn del" onclick="removeCategory(${i})" title="Remove">🗑️</button>`:'<span style="font-size:10px;color:var(--muted)">Default</span>'}
+      </div>
+    </div>`).join('');
+}
+
+function addCategory(){
+  const name = document.getElementById('new-cat-name').value.trim();
+  const emoji = document.getElementById('new-cat-emoji').value.trim() || '🍽️';
+  if(!name){ alert('Please enter category name'); return; }
+  if(CATEGORIES.find(c=>c.name.toLowerCase()===name.toLowerCase())){ alert('Category already exists!'); return; }
+  CATEGORIES.push({name, emoji});
+  // Add to all category dropdowns
+  ['new-cat','admin-cat-filter'].forEach(id=>{
+    const sel = document.getElementById(id);
+    if(sel){ const opt=document.createElement('option'); opt.value=name; opt.textContent=name; sel.appendChild(opt); }
+  });
+  // Add chip to member view
+  const chips = document.getElementById('chips');
+  if(chips){ const chip=document.createElement('div'); chip.className='chip'; chip.textContent=emoji+' '+name; chip.onclick=function(){setFilter(this,name);}; chips.appendChild(chip); }
+  document.getElementById('new-cat-name').value='';
+  document.getElementById('new-cat-emoji').value='';
+  document.getElementById('cat-form').classList.remove('show');
+  renderCategories();
+  alert('✅ Category '+name+' added!');
+}
+
+function removeCategory(idx){
+  const cat = CATEGORIES[idx];
+  if(RECIPES.find(r=>r.cat===cat.name)){ alert('Cannot remove — '+cat.name+' has recipes. Move recipes to another category first.'); return; }
+  if(!confirm('Remove category '+cat.name+'?')) return;
+  CATEGORIES.splice(idx,1);
+  renderCategories();
+}
+
+
+// ── YOUTUBE HELPER ──
+function getYouTubeId(url){
+  if(!url) return null;
+  const patterns = [
+    /youtube\.com\/watch\?v=([^&]+)/,
+    /youtu\.be\/([^?]+)/,
+    /youtube\.com\/embed\/([^?]+)/,
+    /youtube\.com\/shorts\/([^?]+)/
+  ];
+  for(const p of patterns){
+    const m = url.match(p);
+    if(m) return m[1];
+  }
+  return null;
+}
+
+
+// ── YOUTUBE HELPERS ──
+function getYTId(url){
+  if(!url||url==='#') return null;
+  const patterns = [
+    /youtube\.com\/watch\?v=([^&]+)/,
+    /youtu\.be\/([^?]+)/,
+    /youtube\.com\/embed\/([^?]+)/,
+    /youtube\.com\/shorts\/([^?]+)/
+  ];
+  for(const p of patterns){
+    const m = url.match(p);
+    if(m) return m[1];
+  }
+  // If they paste just the video ID directly
+  if(/^[a-zA-Z0-9_-]{11}$/.test(url)) return url;
+  return null;
+}
+
+function loadYT(id, ytId){
+  const ph = document.getElementById(`yt-ph-${id}`);
+  const wrap = document.getElementById(`yt-wrap-${id}`);
+  if(!ph||!wrap) return;
+  const iframe = document.createElement('iframe');
+  iframe.src = `https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1`;
+  iframe.allow = 'accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture';
+  iframe.allowFullscreen = true;
+  ph.style.display = 'none';
+  wrap.appendChild(iframe);
+}
+
+
+// ── YOUTUBE PLAYER ──
+function getYTId(url){
+  if(!url || url==='#') return null;
+  const patterns = [
+    /(?:youtube\.com\/watch\?v=|youtu\.be\/|youtube\.com\/embed\/)([\w-]{11})/,
+    /^([\w-]{11})$/
+  ];
+  for(const p of patterns){
+    const m = url.match(p);
+    if(m) return m[1];
+  }
+  return null;
+}
+
+function renderYTPlayer(url, containerId){
+  const container = document.getElementById(containerId);
+  if(!container) return;
+  const ytId = getYTId(url);
+  if(!ytId){
+    container.innerHTML = `
+      <div class="no-video">
+        <div class="no-video-icon">🎬</div>
+        <div class="no-video-txt">No video added yet</div>
+        <div style="font-size:11px;color:var(--muted)">Admin can add YouTube URL</div>
+      </div>`;
+    return;
+  }
+  const thumbUrl = `https://img.youtube.com/vi/${ytId}/hqdefault.jpg`;
+  container.innerHTML = `
+    <div class="yt-container" id="yt-wrap-${ytId}">
+      <img class="yt-thumb" src="${thumbUrl}" alt="Video thumbnail"
+        onerror="this.style.display='none'"
+        onload="document.getElementById('yt-overlay-${ytId}').style.display='flex'"/>
+      <div class="yt-play-overlay" id="yt-overlay-${ytId}" style="display:none" onclick="playYT('${ytId}')">
+        <div class="yt-play-btn"></div>
+      </div>
+    </div>`;
+  // Show overlay immediately as fallback
+  setTimeout(()=>{
+    const overlay = document.getElementById(`yt-overlay-${ytId}`);
+    if(overlay) overlay.style.display='flex';
+  }, 500);
+}
+
+function playYT(ytId){
+  const wrap = document.getElementById(`yt-wrap-${ytId}`);
+  if(!wrap) return;
+  wrap.innerHTML = `
+    <div class="yt-loading" id="yt-loading-${ytId}">
+      <div class="yt-loading-spinner"></div>
+      <div class="yt-loading-txt">Loading video...</div>
+    </div>
+    <iframe class="yt-frame" id="yt-iframe-${ytId}"
+      src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1"
+      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+      allowfullscreen
+      onload="document.getElementById('yt-loading-${ytId}').style.display='none'">
+    </iframe>`;
+}
+
+
+// ── YOUTUBE HELPERS ──
+function getYtId(url){
+  if(!url||url==='#') return null;
+  const patterns = [
+    /youtube\.com\/watch\?v=([^&]+)/,
+    /youtu\.be\/([^?]+)/,
+    /youtube\.com\/embed\/([^?]+)/,
+    /youtube\.com\/shorts\/([^?]+)/
+  ];
+  for(const p of patterns){
+    const m = url.match(p);
+    if(m) return m[1];
+  }
+  return null;
+}
+
+function loadYT(id, ytId){
+  const box = document.getElementById('yt-box-'+id);
+  if(!box) return;
+  box.innerHTML = `<iframe class="yt-iframe"
+    src="https://www.youtube.com/embed/${ytId}?autoplay=1&rel=0&modestbranding=1"
+    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+    allowfullscreen></iframe>`;
+}
+
+</script>
+
+<!-- ══════════════ ADMIN SCREEN ══════════════ -->
+<div class="screen hidden" id="admin-screen">
+  <nav class="admin-nav">
+    <div class="admin-nav-left">
+      <button class="admin-back" onclick="exitAdmin()">←</button>
+      <div class="admin-nav-title">Admin Panel</div>
+    </div>
+    <div class="admin-badge">⚙️ ADMIN</div>
+  </nav>
+
+  <div class="admin-body">
+
+    <!-- Stats -->
+    <div class="admin-stats">
+      <div class="admin-stat-card">
+        <div class="admin-stat-num" id="a-recipes">6</div>
+        <div class="admin-stat-lbl">Recipes</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num">100</div>
+        <div class="admin-stat-lbl">Members</div>
+      </div>
+      <div class="admin-stat-card">
+        <div class="admin-stat-num">4.8★</div>
+        <div class="admin-stat-lbl">Avg Rating</div>
+      </div>
+    </div>
+
+    <!-- Tabs -->
+    <div class="admin-tabs">
+      <button class="admin-tab active" onclick="adminTab(this,'tab-recipes')">
+        <span class="admin-tab-icon">📹</span>Recipes
+      </button>
+      <button class="admin-tab" onclick="adminTab(this,'tab-broadcast')">
+        <span class="admin-tab-icon">📢</span>Broadcast
+      </button>
+      <button class="admin-tab" onclick="adminTab(this,'tab-members')">
+        <span class="admin-tab-icon">👥</span>Members
+      </button>
+      <button class="admin-tab" onclick="adminTab(this,'tab-settings')">
+        <span class="admin-tab-icon">⚙️</span>Settings
+      </button>
+    </div>
+
+    <!-- RECIPES TAB -->
+    <div class="admin-tab-content active" id="tab-recipes">
+      <div class="recipe-mgmt-card">
+        <div class="recipe-mgmt-hdr">
+          <div class="recipe-mgmt-title">All Recipes</div>
+          <button class="add-recipe-btn" onclick="toggleAddForm()">＋ Add Recipe</button>
+        </div>
+
+        <!-- Filter & Search bar -->
+        <div style="display:flex;gap:8px;margin-bottom:10px">
+          <div class="search-box" style="flex:1">
+            <span class="search-icon">🔍</span>
+            <input class="search-input" id="admin-recipe-search" placeholder="Search recipes..." oninput="filterAdminRecipes()"/>
+          </div>
+          <select class="f-select" id="admin-cat-filter" onchange="filterAdminRecipes()" style="width:130px;padding:10px 8px;font-size:12px">
+            <option value="All">All Categories</option>
+            <option>Breakfast</option>
+            <option>Lunch</option>
+            <option>Dinner</option>
+            <option>Soups</option>
+            <option>Salads</option>
+            <option>Snacks</option>
+          </select>
+        </div>
+        <div style="font-size:11px;color:var(--muted);margin-bottom:8px">
+          Showing <span id="admin-recipe-count">0</span> recipes
+        </div>
+
+        <!-- Search + Filter row -->
+        <div style="display:flex;gap:8px;margin-bottom:12px">
+          <div style="flex:1;display:flex;align-items:center;gap:6px;background:#f3f4f6;border-radius:10px;padding:8px 12px">
+            <span style="font-size:13px">🔍</span>
+            <input id="admin-search" style="border:none;outline:none;background:transparent;font-size:13px;font-family:DM Sans,sans-serif;width:100%" placeholder="Search recipes..." oninput="renderAdminRecipes()"/>
+          </div>
+          <select id="admin-cat-filter" style="border:1.5px solid var(--border);border-radius:10px;padding:8px 10px;font-size:12px;font-family:DM Sans,sans-serif;outline:none;background:white" onchange="renderAdminRecipes()">
+            <option value="All">All Categories</option>
+            <option>Breakfast</option>
+            <option>Lunch</option>
+            <option>Dinner</option>
+            <option>Soups</option>
+            <option>Salads</option>
+            <option>Snacks</option>
+          </select>
+        </div>
+
+        <!-- Add Recipe Form -->
+        <div class="add-form" id="add-form">
+          <div style="background:#EFF6FF;border-radius:10px;padding:12px;margin-bottom:12px;font-size:12px;color:#1D4ED8;line-height:1.8">
+            <strong>📹 How to add a video:</strong><br/>
+            1. Record on phone OR desktop 📱💻<br/>
+            2. Upload to <a href="https://youtube.com" target="_blank" style="color:#1D4ED8;font-weight:600">youtube.com</a> → set <strong>Unlisted</strong> 🔒<br/>
+            3. Copy the video URL and paste below ⬇️
+          </div>
+          <div class="form-grp"><label class="form-lbl">Recipe Title</label><input class="f-input" id="new-title" placeholder="e.g. Turmeric Oats Porridge"/></div>
+          <div class="form-row">
+            <div class="form-grp"><label class="form-lbl">Category</label>
+              <select class="f-select" id="new-cat">
+                <option>Breakfast</option><option>Lunch</option><option>Dinner</option>
+                <option>Soups</option><option>Salads</option><option>Snacks</option>
+              </select>
+            </div>
+            <div class="form-grp"><label class="form-lbl">Duration</label><input class="f-input" id="new-dur" placeholder="2:00"/></div>
+          </div>
+          <div class="form-grp"><label class="form-lbl">YouTube URL</label><input class="f-input" id="new-url" placeholder="https://youtube.com/watch?v=... or just the video ID"/>
+          <div style="font-size:11px;color:var(--muted);margin-top:4px">
+            💡 Upload video to YouTube as <strong>Unlisted</strong> → copy link → paste here. Works from phone & desktop!
+          </div></div>
+          <div class="form-grp"><label class="form-lbl">Nutrition Tags</label><input class="f-input" id="new-tags" placeholder="High fiber, Low sugar"/></div>
+          <div class="form-grp"><label class="form-lbl">Notes</label><input class="f-input" id="new-notes" placeholder="Optional tip for members"/></div>
+          <div style="display:flex;gap:8px">
+            <button class="pub-btn" style="flex:1" onclick="addRecipe()">✅ Publish Recipe</button>
+            <button class="pub-btn" style="flex:0;background:#6b7280;padding:13px 16px" onclick="toggleAddForm()">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Recipe count -->
+        <div id="admin-recipe-count" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
+
+        <!-- Recipe list -->
+        <div id="admin-recipe-list"></div>
+      </div>
+
+      <!-- Manage Categories -->
+      <div class="recipe-mgmt-card" style="margin-top:12px">
+        <div class="recipe-mgmt-hdr">
+          <div class="recipe-mgmt-title">📂 Manage Categories</div>
+          <button class="add-recipe-btn" onclick="toggleCatForm()">＋ Add Category</button>
+        </div>
+        <div class="add-form" id="cat-form">
+          <div style="display:flex;gap:8px">
+            <input class="f-input" id="new-cat-name" placeholder="e.g. Juices" style="flex:1"/>
+            <input class="f-input" id="new-cat-emoji" placeholder="🥤" style="width:60px;text-align:center"/>
+            <button class="pub-btn" style="flex:0;padding:11px 14px;margin:0" onclick="addCategory()">Add</button>
+          </div>
+        </div>
+        <div id="cat-list"></div>
+      </div>
+    </div>
+
+    <!-- BROADCAST TAB -->
+    <div class="admin-tab-content" id="tab-broadcast">
+      <div class="bc-full">
+        <div class="coming-soon">⚠️ Wati.io integration coming in Phase 2. UI ready — needs API connection.</div>
+        <div class="bc-hdr" style="margin-bottom:14px">
+          <div class="bc-icon">💬</div>
+          <div class="bc-hdr-txt"><strong>Compose Broadcast</strong><span>Sends to all 100 members via WhatsApp</span></div>
+        </div>
+        <div class="form-lbl" style="margin-bottom:6px">Attach Media</div>
+        <div class="media-row">
+          <button class="media-btn" onclick="simMedia('image')"><span class="media-btn-icon">🖼️</span><span class="media-btn-lbl">Image</span></button>
+          <button class="media-btn" onclick="simMedia('video')"><span class="media-btn-icon">🎥</span><span class="media-btn-lbl">Video</span></button>
+          <button class="media-btn" onclick="simMedia('pdf')"><span class="media-btn-icon">📄</span><span class="media-btn-lbl">PDF</span></button>
+          <button class="media-btn" onclick="toggleEmoji()"><span class="media-btn-icon">😊</span><span class="media-btn-lbl">Emoji</span></button>
+        </div>
+        <div class="media-preview" id="media-preview">
+          <div class="prev-thumb" id="prev-thumb">🖼️</div>
+          <div class="prev-info"><div class="prev-name" id="prev-name">file.jpg</div><div class="prev-size" id="prev-size">Ready to send</div></div>
+          <button class="prev-rm" onclick="removeMedia()">✕</button>
+        </div>
+        <div class="emoji-picker" id="emoji-picker">
+          <div class="ep-title">Health & food emojis</div>
+          <div class="ep-grid" id="ep-grid"></div>
+        </div>
+        <div class="form-lbl" style="margin-bottom:6px">Message</div>
+        <div class="msg-wrap">
+          <div class="msg-toolbar">
+            <button class="tb-btn" style="font-weight:700" onclick="fmt('bold')">B</button>
+            <button class="tb-btn" style="font-style:italic" onclick="fmt('italic')">I</button>
+            <button class="tb-btn" style="text-decoration:line-through" onclick="fmt('strikeThrough')">S</button>
+            <div class="tb-divider"></div>
+            <button class="tb-btn" onclick="tpl('💡 Nutrition Tip:\n\n')">💡 Tip</button>
+            <button class="tb-btn" onclick="tpl('⚠️ Important Update:\n\n')">⚠️ Alert</button>
+            <button class="tb-btn" onclick="tpl('🍽️ New Recipe Alert!\n\n')">🍽️ Recipe</button>
+          </div>
+          <div id="msg-editor" class="msg-editor" contenteditable="true" oninput="updCount()"></div>
+          <div class="msg-footer"><span class="char-cnt" id="char-cnt">0 / 1000</span></div>
+        </div>
+        <div class="sched-row">
+          <label class="tog-track"><input type="checkbox" id="sched-tog" onchange="toggleSched()"/><span class="tog-slider"></span></label>
+          <span class="sched-lbl">Schedule for later</span>
+          <input type="datetime-local" class="sched-input" id="sched-input"/>
+        </div>
+        <button class="wa-send" onclick="sendBc()">📲 Send to All 100 Members</button>
+        <div class="wa-note">✓ Verified members only · Via WhatsApp Business API</div>
+      </div>
+    </div>
+
+    <!-- MEMBERS TAB -->
+    <div class="admin-tab-content" id="tab-members">
+      <div class="members-card">
+        <div class="recipe-mgmt-hdr">
+          <div class="recipe-mgmt-title">Community Members</div>
+          <button class="add-recipe-btn" onclick="toggleMemberForm()">＋ Add Member</button>
+        </div>
+
+        <!-- Search members -->
+        <div style="display:flex;align-items:center;gap:6px;background:#f3f4f6;border-radius:10px;padding:8px 12px;margin-bottom:12px">
+          <span style="font-size:13px">🔍</span>
+          <input id="member-search" style="border:none;outline:none;background:transparent;font-size:13px;font-family:DM Sans,sans-serif;width:100%" placeholder="Search by name or number..." oninput="renderAdminMembers()"/>
+        </div>
+
+        <!-- Add member form -->
+        <div class="add-form" id="member-form">
+          <div class="form-row">
+            <div class="form-grp"><label class="form-lbl">Full Name</label><input class="f-input" id="new-m-name" placeholder="e.g. Priya Sharma"/></div>
+            <div class="form-grp"><label class="form-lbl">Country</label>
+              <select class="f-select" id="new-m-country">
+                <option>India 🇮🇳</option><option>UAE 🇦🇪</option><option>UK 🇬🇧</option>
+                <option>USA 🇺🇸</option><option>Australia 🇦🇺</option><option>Singapore 🇸🇬</option>
+                <option>Malaysia 🇲🇾</option><option>Sri Lanka 🇱🇰</option><option>Other 🌍</option>
+              </select>
+            </div>
+          </div>
+          <div class="form-grp"><label class="form-lbl">WhatsApp Number (with country code)</label>
+            <input class="f-input" id="new-m-num" placeholder="e.g. +919876543210"/>
+          </div>
+          <div style="background:var(--amber-pale);border-radius:8px;padding:8px 12px;font-size:11px;color:#92400E;margin-bottom:10px">
+            ⚠️ Also add this number to your Google Sheet Column C to enable login verification.
+          </div>
+          <div style="display:flex;gap:8px">
+            <button class="pub-btn" style="flex:1" onclick="addMember()">✅ Add Member</button>
+            <button class="pub-btn" style="flex:0;background:#6b7280;padding:13px 16px" onclick="toggleMemberForm()">Cancel</button>
+          </div>
+        </div>
+
+        <!-- Members count -->
+        <div id="member-count" style="font-size:11px;color:var(--muted);margin-bottom:8px"></div>
+
+        <!-- Members list -->
+        <div id="admin-members-list"></div>
+      </div>
+    </div>
+
+    <!-- SETTINGS TAB -->
+    <div class="admin-tab-content" id="tab-settings">
+      <div class="settings-card">
+        <div class="settings-card-title">🔐 Change Admin Password</div>
+        <div class="form-grp"><label class="form-lbl">Current Password</label><input class="f-input" id="curr-pwd" type="password" placeholder="Enter current password"/></div>
+        <div class="form-grp"><label class="form-lbl">New Password</label><input class="f-input" id="new-pwd" type="password" placeholder="Min 6 characters"/></div>
+        <div class="form-grp"><label class="form-lbl">Confirm New Password</label><input class="f-input" id="conf-pwd" type="password" placeholder="Re-enter new password"/></div>
+        <div id="pwd-msg" style="font-size:12px;margin-bottom:10px;min-height:18px"></div>
+        <button class="pub-btn" onclick="changePassword()">🔐 Update Password</button>
+      </div>
+      <div class="settings-card">
+        <div class="settings-card-title">ℹ️ App Info</div>
+        <div style="font-size:13px;color:var(--muted);line-height:2">
+          👥 Community: 100 members<br/>
+          📹 Recipes: <span id="info-count">6</span> videos<br/>
+          🔒 Auth: WhatsApp OTP (Phase 2)<br/>
+          📢 Broadcast: Wati.io (Phase 2)<br/>
+          🌐 Hosting: GitHub Pages · Free<br/>
+          📊 Database: Google Sheets · Free
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+</body>
+</html>
