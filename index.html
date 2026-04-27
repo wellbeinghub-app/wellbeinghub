@@ -710,7 +710,8 @@ const CAT_EMOJIS = {Breakfast:'🥣',Lunch:'🥗',Dinner:'🍛',Soups:'🍲',Sal
 async function loadRecipes(){
   showRecipesLoading();
   try {
-    const tabs = ['Recipes','📹 Recipes','recipes','Sheet2','Sheet1'];
+    // Try all possible tab names (with and without emoji)
+    const tabs = ['Recipes','📹 Recipes','recipes','Sheet1','Sheet2'];
     let rows = null;
     for(const tab of tabs){
       try {
@@ -720,32 +721,53 @@ async function loadRecipes(){
         const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*?)\);/s)[1]);
         if(json.table && json.table.rows && json.table.rows.length > 1){
           rows = json.table.rows;
-          console.log('Found recipes in tab:', tab);
+          console.log('✅ Found recipes in tab:', tab, '| Total rows:', rows.length);
           break;
         }
       } catch(e){ console.log('Tab not found:', tab); continue; }
     }
-    if(!rows || rows.length < 2) throw new Error('No recipe data found in sheet. Check tab name is Recipes and has data.');
+    if(!rows || rows.length < 1) throw new Error('No recipe data found. Check the sheet is shared publicly (Anyone with link → Viewer).');
 
-    RECIPES = rows.slice(1)
-      .filter(r => r.c && r.c[1]?.v)
-      .map((r, i) => ({
-        id: i + 1,
-        title: r.c[1]?.v?.toString().trim() || '',
-        cat: r.c[2]?.v?.toString().trim() || 'Breakfast',
-        url: r.c[3]?.v?.toString().trim() || '',
-        tags: (r.c[5]?.v?.toString() || '').split(',').map(t => t.trim()).filter(Boolean),
-        dur: r.c[6]?.v?.toString().trim() || '2:00',
-        rating: 4.5,
-        notes: r.c[10]?.v?.toString().trim() || '',
-        emoji: CAT_EMOJIS[r.c[2]?.v?.toString().trim()] || '🍽️',
-        active: r.c[9]?.v?.toString().toUpperCase().trim() === 'YES'
-      }))
+    // ── Smart header detection ──
+    // Find the row where col[0] looks like "Recipe ID" or col[1] looks like "Recipe Title"
+    // This handles sheets with 1 or 2 intro/instruction rows at the top
+    let dataStartIdx = 0;
+    for(let i = 0; i < Math.min(rows.length, 5); i++){
+      const c0 = rows[i].c?.[0]?.v?.toString().toLowerCase() || '';
+      const c1 = rows[i].c?.[1]?.v?.toString().toLowerCase() || '';
+      if(c0.includes('recipe id') || c1.includes('recipe title') || c1.includes('title')){
+        dataStartIdx = i + 1; // skip the header row itself
+        console.log('📋 Header row found at index:', i, '→ data starts at:', dataStartIdx);
+        break;
+      }
+    }
+    // If no header row found, skip just the first row (default)
+    if(dataStartIdx === 0) dataStartIdx = 1;
+
+    RECIPES = rows.slice(dataStartIdx)
+      .filter(r => r.c && r.c[1]?.v) // must have a title
+      .map((r, i) => {
+        const active = r.c[9]?.v?.toString().toUpperCase().trim();
+        return {
+          id: i + 1,
+          title: r.c[1]?.v?.toString().trim() || '',
+          cat: r.c[2]?.v?.toString().trim() || 'Breakfast',
+          url: r.c[3]?.v?.toString().trim() || '',
+          tags: (r.c[5]?.v?.toString() || '').split(',').map(t => t.trim()).filter(Boolean),
+          dur: r.c[6]?.v?.toString().trim() || '2:00',
+          rating: 4.5,
+          notes: r.c[10]?.v?.toString().trim() || '',
+          emoji: CAT_EMOJIS[r.c[2]?.v?.toString().trim()] || '🍽️',
+          active: active === 'YES'
+        };
+      })
       .filter(r => r.active && r.title);
 
-    console.log('Loaded recipes:', RECIPES.length);
+    console.log('✅ Active recipes loaded:', RECIPES.length);
 
-    if(!RECIPES.length) throw new Error('No active recipes found. Make sure Column J says YES for your recipes.');
+    if(!RECIPES.length) throw new Error(
+      'No active recipes found. Make sure:\n• Column J (Active) says YES\n• The sheet is shared publicly (Anyone with link → Viewer)'
+    );
     
     renderRecipes();
     if(document.getElementById('total-count')) 
@@ -832,14 +854,28 @@ async function sendOTP(){
 
 async function checkMember(phone){
   const sheetId = '1PH3ewef8ti1NN-qLg5YznUAsMpEwj5EJqUBtSUTeW5k';
-  const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=Members`;
-  const res = await fetch(url);
-  const text = await res.text();
-  const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*?)\);/s)[1]);
-  const rows = json.table.rows;
-  const normalize = n => n.toString().replace(/\s/g,'').replace(/^\+/,'');
-  const numbers = rows.map(r => r.c[2]?.v?.toString()).filter(Boolean);
+  // Try both Members tab names
+  const tabs = ['Members','👥 Members','members','Sheet2'];
+  let rows = null;
+  for(const tab of tabs){
+    try{
+      const url = `https://docs.google.com/spreadsheets/d/${sheetId}/gviz/tq?tqx=out:json&sheet=${encodeURIComponent(tab)}`;
+      const res = await fetch(url);
+      const text = await res.text();
+      const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*?)\);/s)[1]);
+      if(json.table && json.table.rows && json.table.rows.length){
+        rows = json.table.rows; break;
+      }
+    } catch(e){ continue; }
+  }
+  if(!rows) return false;
+  const normalize = n => n.toString().replace(/[\s\-()]/g,'').replace(/^\+/,'');
   const inputNorm = normalize(phone);
+  // Filter to rows that look like actual phone numbers (skip header/instruction rows)
+  const numbers = rows
+    .map(r => r.c?.[2]?.v?.toString() || '')
+    .filter(n => /^\+?\d{7,}/.test(n.replace(/\s/g,'')));
+  console.log('Members found in sheet:', numbers.length);
   return numbers.some(n => normalize(n) === inputNorm);
 }
 
