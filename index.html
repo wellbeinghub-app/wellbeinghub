@@ -745,29 +745,32 @@ async function loadRecipes(){
     if(dataStartIdx === 0) dataStartIdx = 1;
 
     RECIPES = rows.slice(dataStartIdx)
-      .filter(r => r.c && r.c[1]?.v) // must have a title
+      .filter(r => {
+        // Must have a title in col B (index 1)
+        const title = r.c?.[1]?.v?.toString().trim();
+        if(!title) return false;
+        // Skip rows where title looks like a header
+        if(title.toLowerCase().includes('recipe title') || title.toLowerCase().includes('title')) return false;
+        return true;
+      })
       .map((r, i) => {
-        const active = r.c[9]?.v?.toString().toUpperCase().trim();
+        const cat = r.c[2]?.v?.toString().trim() || 'Breakfast';
         return {
           id: i + 1,
           title: r.c[1]?.v?.toString().trim() || '',
-          cat: r.c[2]?.v?.toString().trim() || 'Breakfast',
+          cat: cat,
           url: r.c[3]?.v?.toString().trim() || '',
           tags: (r.c[5]?.v?.toString() || '').split(',').map(t => t.trim()).filter(Boolean),
           dur: r.c[6]?.v?.toString().trim() || '2:00',
           rating: 4.5,
           notes: r.c[10]?.v?.toString().trim() || '',
-          emoji: CAT_EMOJIS[r.c[2]?.v?.toString().trim()] || '🍽️',
-          active: active === 'YES'
+          emoji: CAT_EMOJIS[cat] || '🍽️'
         };
-      })
-      .filter(r => r.active && r.title);
+      });
 
     console.log('✅ Active recipes loaded:', RECIPES.length);
 
-    if(!RECIPES.length) throw new Error(
-      'No active recipes found. Make sure:\n• Column J (Active) says YES\n• The sheet is shared publicly (Anyone with link → Viewer)'
-    );
+    if(!RECIPES.length) throw new Error('No recipe data found. Make sure the sheet is shared publicly (Anyone with link → Viewer) and rows have titles in Column B.');
     
     renderRecipes();
     if(document.getElementById('total-count')) 
@@ -909,21 +912,6 @@ function showStep(id){
   document.querySelectorAll('.otp-step').forEach(s=>s.classList.remove('active'));
   document.getElementById(id).classList.add('active');
 }
-function debugSheet(){
-  const SHEET_ID = '1PH3ewef8ti1NN-qLg5YznUAsMpEwj5EJqUBtSUTeW5k';
-  const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=Recipes`;
-  fetch(url).then(r=>r.text()).then(text=>{
-    const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*?)\);/s)[1]);
-    const rows = json.table.rows;
-    console.log('TOTAL ROWS:', rows.length);
-    rows.slice(0,5).forEach((r,i)=>{
-      const cols = r.c ? r.c.map((c,ci)=>`[${ci}]=${JSON.stringify(c?.v)}`) : [];
-      console.log('ROW '+i+':', cols.join(' | '));
-    });
-  });
-}
-window.debugSheet = debugSheet;
-
 function enterApp(){
   document.getElementById('otp-screen').classList.add('slide-left');
   document.getElementById('app-screen').classList.remove('hidden');
