@@ -711,7 +711,7 @@ async function loadRecipes(){
   showRecipesLoading();
   try {
     // Try all possible tab names (with and without emoji)
-    const tabs = ['Recipes','📹 Recipes','recipes','Sheet1','Sheet2'];
+    const tabs = ['Recipes','📹 Recipes','recipes','Sheet1','Sheet2','Sheet3','Sheet4'];
     let rows = null;
     for(const tab of tabs){
       try {
@@ -719,49 +719,56 @@ async function loadRecipes(){
         const res = await fetch(url);
         const text = await res.text();
         const json = JSON.parse(text.match(/google\.visualization\.Query\.setResponse\((.*?)\);/s)[1]);
-        if(json.table && json.table.rows && json.table.rows.length > 1){
-          rows = json.table.rows;
+        const tabRows = json.table?.rows;
+        if(!tabRows || tabRows.length < 2) continue;
+        // Verify this tab has recipe data: look for a YouTube URL anywhere in first 10 rows
+        const hasYT = tabRows.slice(0,10).some(r =>
+          r.c && r.c.some(c => c?.v?.toString().includes('youtube') || c?.v?.toString().includes('youtu.be'))
+        );
+        if(hasYT){
+          rows = tabRows;
           console.log('✅ Found recipes in tab:', tab, '| Total rows:', rows.length);
           break;
+        } else {
+          console.log('⏭️ Tab', tab, 'has no YouTube URLs - skipping');
         }
       } catch(e){ console.log('Tab not found:', tab); continue; }
     }
     if(!rows || rows.length < 1) throw new Error('No recipe data found. Check the sheet is shared publicly (Anyone with link → Viewer).');
 
-    // ── Smart header detection ──
-    // Find the row where col[0] looks like "Recipe ID" or col[1] looks like "Recipe Title"
-    // This handles sheets with 1 or 2 intro/instruction rows at the top
-    let dataStartIdx = 0;
-    for(let i = 0; i < Math.min(rows.length, 5); i++){
-      const c0 = rows[i].c?.[0]?.v?.toString().toLowerCase() || '';
-      const c1 = rows[i].c?.[1]?.v?.toString().toLowerCase() || '';
-      if(c0.includes('recipe id') || c1.includes('recipe title') || c1.includes('title')){
-        dataStartIdx = i + 1; // skip the header row itself
-        console.log('📋 Header row found at index:', i, '→ data starts at:', dataStartIdx);
+    // ── Find data start: skip all title/instruction/header rows ──
+    // A real data row has a RecipeID like REC001 in col A, OR a YouTube URL in col D
+    let dataStartIdx = 1; // default: skip 1 row
+    for(let i = 0; i < Math.min(rows.length, 6); i++){
+      const c0 = rows[i].c?.[0]?.v?.toString().trim() || '';
+      const c3 = rows[i].c?.[3]?.v?.toString().trim() || '';
+      const isDataRow = /^REC\d+/i.test(c0) || c3.includes('youtube') || c3.includes('youtu.be');
+      if(isDataRow){
+        dataStartIdx = i;
+        console.log('📋 Data starts at row index:', dataStartIdx, '| First ID:', c0);
         break;
       }
     }
-    // If no header row found, skip just the first row (default)
-    if(dataStartIdx === 0) dataStartIdx = 1;
 
     RECIPES = rows.slice(dataStartIdx)
       .filter(r => {
-        // Must have a title in col B (index 1)
-        const title = r.c?.[1]?.v?.toString().trim();
-        if(!title) return false;
-        // Skip rows where title looks like a header
-        if(title.toLowerCase().includes('recipe title') || title.toLowerCase().includes('title')) return false;
-        return true;
+        const title = r.c?.[1]?.v?.toString().trim() || '';
+        const ytUrl = r.c?.[3]?.v?.toString().trim() || '';
+        // Must have a title AND a YouTube URL to be a valid recipe
+        return title && ytUrl && (ytUrl.includes('youtube') || ytUrl.includes('youtu.be'));
       })
       .map((r, i) => {
         const cat = r.c[2]?.v?.toString().trim() || 'Breakfast';
+        // Duration: handle both "2" and "2:00" formats
+        let dur = r.c[6]?.v?.toString().trim() || '2:00';
+        if(!dur.includes(':') && !isNaN(dur)) dur = parseFloat(dur).toFixed(0) + ' min';
         return {
           id: i + 1,
           title: r.c[1]?.v?.toString().trim() || '',
           cat: cat,
           url: r.c[3]?.v?.toString().trim() || '',
           tags: (r.c[5]?.v?.toString() || '').split(',').map(t => t.trim()).filter(Boolean),
-          dur: r.c[6]?.v?.toString().trim() || '2:00',
+          dur: dur,
           rating: 4.5,
           notes: r.c[10]?.v?.toString().trim() || '',
           emoji: CAT_EMOJIS[cat] || '🍽️'
